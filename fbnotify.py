@@ -183,7 +183,7 @@ def poll(feed_url):
 	# Get new items
 	news = []
 	for node in tree.iter('item'):
-		pub = time.mktime(email.utils.parsedate(node.find('pubDate').text))
+		pub = email.utils.mktime_tz(email.utils.parsedate_tz(node.find('pubDate').text))
 		if pub <= last_mod:
 			break
 		news.append(Item(node.find('title').text, node.find('link').text, pub))
@@ -212,7 +212,7 @@ def notify(notifs):
 			# Enumerate notifications if enabled
 			if config.itemize >= n:
 				for item in sorted(notifs, key=lambda x: x.time):
-					notif = pynotify.Notification(title, item.text, icon)
+					notif = pynotify.Notification(title, format_item(item), icon)
 					notif.show()
 					notif.set_timeout(config.notif_interval)
 					time.sleep(config.notif_interval)
@@ -220,13 +220,25 @@ def notify(notifs):
 		else: # Single notification
 
 			if config.show_content:
-				notif = pynotify.Notification(title, notifs[0].text, icon)
+				notif = pynotify.Notification(title, format_item(notifs[0]), icon)
 			else:
 				notif = pynotify.Notification(title, "1 new notification", icon)
 
 			notif.show()
 
 
+# Format notification
+def format_item(item):
+	text = item.text
+	text += '\n'
+	text += format_time(item.time)
+	return text
+
+
+# Format time as relative time
+def format_time(time):
+	current = time.localtime()
+	return "{0} seconds ago".format(time - current)
 
 
 if __name__ == "__main__":
