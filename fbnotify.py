@@ -167,6 +167,7 @@ def poll(feed_url):
 		time_f.close()
 	except IOError:
 		print('WARNING: Unable to open {0}'.format(last_mod_path))
+		print('A new file will be created')
 
 	# Read feed from URL
 	try:
@@ -192,6 +193,10 @@ def poll(feed_url):
 	time_f = open(last_mod_path, 'w')
 	time_f.write(modified_str)
 	time_f.close
+
+	# If first run / No last mod
+	if last_mod == 0:
+		return True
 
 	# Read and parse the feed
 	xml = feed.read()
