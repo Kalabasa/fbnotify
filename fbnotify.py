@@ -9,11 +9,14 @@ import email.utils
 import urllib2
 import time
 import os
+import sys
 
 
 # Application configuration
 class Config:
 	def __init__(self, file):
+		file = os.path.abspath(file)
+
 		# Default configutation
 		self.feed_url = ''
 		self.feed_interval = 60 * 4
@@ -23,7 +26,7 @@ class Config:
 
 		# Read config file
 		if not os.path.exists(file):
-			print('FATAL: Config file {0} not found in {1}!'.format(file, os.getcwd()))
+			print('FATAL: Config file {0} not found!'.format(file))
 			self.save(file)
 			print('Created new config file with default values')
 			quit()
@@ -132,12 +135,21 @@ def main():
 
 	print('Initializing..')
 
-	work_dir = user_data_dir('fbnotify', 'Kalabasa')
-	if not os.path.isdir(work_dir):
-		os.makedirs(work_dir)
-		print('Created configuration directory {0}'.format(work_dir))
-	os.chdir(work_dir)
-	config = Config('fbnotify.conf')
+	dirs = AppDirs('fbnotify', 'Kalabasa')
+	conf_dir = dirs.user_data_dir
+	cache_dir = dirs.user_cache_dir
+
+	if not os.path.isdir(conf_dir):
+		os.makedirs(conf_dir)
+		print('Created configuration directory {0}'.format(conf_dir))
+
+	if not os.path.isdir(cache_dir):
+		os.makedirs(cache_dir)
+		print('Created cache directory {0}'.format(cache_dir))
+
+	config = Config(conf_dir + '/fbnotify.conf')
+	os.chdir(cache_dir)
+
 	pynotify.init('fbnotify')
 
 	print('')
@@ -155,7 +167,7 @@ def main():
 # Checks and notifies new notifications
 def poll(feed_url):
 	print('Checking for new notifications..')
-	last_mod_path = '.last-modified'
+	last_mod_path = os.path.abspath('.last-modified')
 
 	# Get the modification time of the feed for the last time I checked
 	last_mod_str = None
