@@ -20,17 +20,22 @@ class Config:
 
 		# Default configutation
 		self.feed_url = ''
-		self.feed_interval = 60 * 4
+		self.check_interval = 60 * 4
+		self.dynamic_interval = True
 		self.show_content = True
 		self.itemize = 3
-		self.notif_interval = 3
+		self.item_interval = 3
+
+		# Section titles
+		self._feed_section = 'Feed'
+		self._notif_section = 'Notification'
 
 		# Read config file
 		if not os.path.exists(file):
-			print('FATAL: Config file {0} not found!'.format(file))
+			print('WARNING: Config file {0} not found!'.format(file))
 			self.save(file)
 			print('Created new config file with default values')
-			quit()
+
 		cp = ConfigParser.RawConfigParser()
 		try:
 			cp.read(file)
@@ -39,67 +44,73 @@ class Config:
 			quit()
 
 		# Constraints
-		feed_interval_min = 30
-		notif_interval_min = 1
+		check_interval_min = 30
+		item_interval_min = 1
 		itemize_min = 2
-
-		# Section titles
-		feed_section = 'Feed'
-		notif_section = 'Notification'
 
 		changed = False;
 
 		try:
-			self.feed_url = cp.get(feed_section, 'URL')
+			self.feed_url = cp.get(self._feed_section, 'url')
 		except ConfigParser.Error:
-			print('FATAL: In {0} [{1}], no URL found!'.format(file, feed_section))
+			print('FATAL: In {0} [{1}], no url found!'.format(file, self._feed_section))
 			quit()
 
 		try:
-			self.feed_interval = cp.getint(feed_section, 'Interval')
+			self.check_interval = cp.getint(self._feed_section, 'check_interval')
 		except ConfigParser.Error:
-			print('In {0} [{1}], no Interval found!'.format(file, feed_section))
-			print('Using default {0} seconds per check'.format(self.feed_interval))
-		if self.feed_interval < feed_interval_min:
-			print('WARNING: [{1}] Interval ({0}) too low'.format(self.feed_interval, feed_section))
-			self.feed_interval = feed_interval_min
+			print('In {0} [{1}], no check_interval found!'.format(file, self._feed_section))
+			print('Using default {0} seconds per check'.format(self.check_interval))
 			changed = True;
-			print('Setting Interval to minimum {0}'.format(self.feed_interval))
+		if self.check_interval < check_interval_min:
+			print('WARNING: [{1}] check_interval ({0}) too low'.format(self.check_interval, self._feed_section))
+			self.check_interval = check_interval_min
+			print('Setting interval to minimum {0}'.format(self.check_interval))
+			changed = True;
 
 		try:
-			self.show_content = cp.getboolean(notif_section, 'ShowContent')
+			self.dynamic_interval = cp.getboolean(self._feed_section, 'dynamic_interval')
 		except ConfigParser.Error:
-			print('In {0} [{1}], no ShowContent found'.format(file, notif_section))
+			print('In {0} [{1}], no dynamic_interval found!'.format(file, self._feed_section))
+			print('Using default {0}'.format(self.dynamic_interval))
+			changed = True;
+
+		try:
+			self.show_content = cp.getboolean(self._notif_section, 'show_content')
+		except ConfigParser.Error:
+			print('In {0} [{1}], no show_content found!'.format(file, self._notif_section))
 			print('Using default {0}'.format(self.show_content))
-
-		try:
-			self.notif_interval = cp.getint(notif_section, 'Interval')
-		except ConfigParser.Error:
-			print('In {0} [{1}], no Interval found!'.format(file, notif_section))
-			print('Using default {0} seconds per check'.format(self.notif_interval))
-		if self.notif_interval < notif_interval_min:
-			print('WARNING: [{1}] Interval ({0}) too low'.format(self.notif_interval, notif_section))
-			self.notif_interval = notif_interval_min
 			changed = True;
-			print('Setting Interval to minimum {0}'.format(self.notif_interval))
 
 		try:
-			self.itemize = cp.getint(notif_section, 'Itemize')
+			self.item_interval = cp.getint(self._notif_section, 'item_interval')
 		except ConfigParser.Error:
-			print('In {0} [{0}], no Itemize found!'.format(file, notif_section))
+			print('In {0} [{1}], no item_interval found!'.format(file, self._notif_section))
+			print('Using default {0} seconds per item'.format(self.item_interval))
+			changed = True;
+		if self.item_interval < item_interval_min:
+			print('WARNING: [{1}] item_interval ({0}) too low'.format(self.item_interval, self._notif_section))
+			self.item_interval = item_interval_min
+			print('Setting item_interval to minimum {0}'.format(self.item_interval))
+			changed = True;
+
+		try:
+			self.itemize = cp.getint(self._notif_section, 'itemize')
+		except ConfigParser.Error:
+			print('In {0} [{1}], no itemize found!'.format(file, self._notif_section))
 			print('Using default {0}'.format(self.itemize))
+			changed = True;
 		if self.itemize != 0 and self.itemize < itemize_min:
-			print('WARNING: [{1}] Itemize ({0}) value invalid'.format(self.itemize, notif_section))
+			print('WARNING: [{1}] itemize ({0}) value invalid'.format(self.itemize, self._notif_section))
 			self.itemize = itemize_min
 			changed = True;
-			print('Setting Itemize to {0}'.format(self.notif_interval))
+			print('Setting itemize to {0}'.format(self.item_interval))
 		if self.itemize > 0 and not self.show_content:
-			print('WARNING: Itemize but not ShowContent')
+			print('WARNING: itemize but not ShowContent')
 			print('No point in itemizing if content is not shown')
 			self.show_content = True
+			print('Setting show_content to {0}'.format(self.show_content))
 			changed = True;
-			print('Setting ShowContent to {0}'.format(self.show_content))
-
 
 		# Save changes due to constraints
 		if changed:
@@ -107,16 +118,22 @@ class Config:
 
 	# Save current configuration to file
 	def save(self, file):
-		cp = ConfigParser.RawConfigParser()
-		cp.set(feed_section, 'URL', self.feed_url)
-		cp.setint(feed_section, 'Interval', self.feed_interval)
-		cp.setboolean(notif_section, 'ShowContent', self.show_content)
-		cp.setint(notif_section, 'Itemize', self.itemize)
-		cp.setint(notif_section, 'Interval', self.notif_interval)
+		cp = ConfigParser.ConfigParser()
+
+		cp.add_section(self._feed_section)
+		cp.set(self._feed_section, 'url', self.feed_url)
+		cp.set(self._feed_section, 'check_interval', self.check_interval)
+		cp.set(self._feed_section, 'dynamic_interval', self.dynamic_interval)
+
+		cp.add_section(self._notif_section)
+		cp.set(self._notif_section, 'show_content', self.show_content)
+		cp.set(self._notif_section, 'itemize', self.itemize)
+		cp.set(self._notif_section, 'item_interval', self.item_interval)
 
 		cfg_file = open(file,'w')
 		cp.write(cfg_file)
 		cfg_file.close()
+		print('Saved configuration to {0}'.format(file))
 
 # A notification
 class Item:
@@ -158,7 +175,7 @@ def main():
 	try:
 		while poll(config.feed_url):
 			print('..')
-			time.sleep(config.feed_interval)
+			time.sleep(config.check_interval)
 	except KeyboardInterrupt:
 		print('')
 		print('Stopped')
@@ -176,68 +193,101 @@ def poll(feed_url):
 	try:
 		time_f = open(last_mod_path, 'r')
 		last_mod_str = time_f.readline()
-		last_mod = time.mktime_tz(email.utils.parsedate_tz(last_mod_str))
+		last_mod = email.utils.mktime_tz(email.utils.parsedate_tz(last_mod_str))
 		time_f.close()
 	except IOError:
 		print('WARNING: Unable to open {0}'.format(last_mod_path))
 		print('A new file will be created')
 
 	# Read feed from URL
+	is_modified = True
 	try:
 		request = urllib2.Request(feed_url)
 		if last_mod != 0:
 			request.add_header('If-Modified-Since', last_mod_str)
 		opener = urllib2.build_opener()
 		feed = opener.open(request)
+	except ValueError:
+		# Invaid URL value
+		print('FATAL: Invalid feed url')
+		return False
 	except urllib2.HTTPError as e:
+		# HTTP status not OK
 		if e.code == 304: # Not modified
-			print('No new notifications as of {0}'.format(time.strftime('%T')))
+			is_modified = False
+		else:
+			print('FATAL: HTTPError' + str(e))
+			print('Unable to load feed URL')
+			print('HTTP status {0}'.format(e.code))
+			print('Reason {0}'.format(str(e.reason)))
+			return False;
+	except IOError as e:
+		# Connection error
+		print('WARNING: IOError' + e)
+		print('Unable to load feed URL')
+		return True
+
+	n = 0
+	if is_modified:
+		# Save the modification time of the feed
+		modified_str = feed.headers.get('Last-Modified')
+		time_f = open(last_mod_path, 'w')
+		time_f.write(modified_str)
+		time_f.close
+
+		# If first run or no last mod
+		if last_mod == 0:
+			print 'Skipping all previous notifications..'
 			return True
-		print('FATAL: Unable to load feed URL')
-		print('HTTP status {0}'.format(e.code))
-		print('Reason {0}'.format(str(e.reason)))
-		return False;
-	except IOError:
-		print('WARNING: Unable to load feed URL')
-		return True
 
-	# Save the modification time of the feed
-	modified_str = feed.headers.get('Last-Modified')
-	time_f = open(last_mod_path, 'w')
-	time_f.write(modified_str)
-	time_f.close
+		# Read and parse the feed
+		xml = feed.read()
+		tree = ElementTree.fromstring(xml)
 
-	# If first run / No last mod
-	if last_mod == 0:
-		return True
+		# Get new items
+		news = []
+		for node in tree.iter('item'):
+			pub = email.utils.mktime_tz(email.utils.parsedate_tz(node.find('pubDate').text))
+			if pub <= last_mod:
+				break
+			title = node.find('title').text
+			link = node.find('link').text
+			dt = datetime.fromtimestamp(pub)
+			news.append(Item(title, link, dt))
 
-	# Read and parse the feed
-	xml = feed.read()
-	tree = ElementTree.fromstring(xml)
+		# Show notification about new items
+		n = len(news)
+		print('{0} new [{1}]'.format(n, time.strftime('%T')))
+		notify(news)
+	else:
+		# Not modified -> no new notifications
+		print('None [{0}]'.format(time.strftime('%T')))
 
-	# Get new items
-	news = []
-	for node in tree.iter('item'):
-		pub = email.utils.mktime_tz(email.utils.parsedate_tz(node.find('pubDate').text))
-		if pub <= last_mod:
-			break
-		title = node.find('title').text
-		link = node.find('link').text
-		dt = datetime.fromtimestamp(pub)
-		news.append(Item(title, link, dt))
-
-	# Show notification about new items
-	n = len(news)
-	print('{0} new notifications'.format(n))
-	notify(news)
+	# Adjust check interval if enabled
+	if config.dynamic_interval:
+		if n == 0:
+			max_interval = 60 * 20
+			if config.check_interval < max_interval:
+				config.check_interval = config.check_interval * 3/2
+				if config.check_interval > max_interval:
+					config.check_interval = max_interval
+				print('Increased check_interval to {0}'.format(config.check_interval))
+		else:
+			min_interval = 15
+			if config.check_interval > min_interval:
+				config.check_interval = config.check_interval * 1/6
+				if config.check_interval < min_interval:
+					config.check_interval = min_interval
+				print('Decreased check_interval to {0}'.format(config.check_interval))
 
 	return True
 
 
 # Show notifications
 def notify(notifs):
-	title = 'Facebook'
+	title = 'fbnotify'
 	icon = 'facebook'
+	wx_icon = None # TODO ???
 	urgency = 'NORMAL'
 
 	n = len(notifs)
@@ -247,21 +297,21 @@ def notify(notifs):
 		notifs = sorted(notifs, key=lambda x: x.dt)
 
 		# Say that there are many notifications
-		xnotify.send(title, '{0} new notifications\n{1}'.format(n, format_time(notifs[0].dt)), icon, None, urgency, config.notif_interval)
+		xnotify.send(title, '{0} new notifications\n{1}'.format(n, format_time(notifs[0].dt)), icon, wx_icon, urgency, config.item_interval)
 
 		# Enumerate notifications if enabled
 		if config.itemize >= n:
 			for item in notifs:
-				xnotify.send(title, format_item(item), icon, None, urgency, config.notif_interval)
-				time.sleep(config.notif_interval)
+				xnotify.send(title, format_item(item), icon, wx_icon, urgency, config.item_interval)
+				time.sleep(config.item_interval)
 
 	elif n == 1: # Single notification
 
 		item = notifs[0]
 		if config.show_content:
-			xnotify.send(title, format_item(item), icon, None, urgency, None)
+			xnotify.send(title, format_item(item), icon, wx_icon, urgency, None)
 		else:
-			xnotify.send(title, '1 new notification\n{0}'.format(format_time(item.dt)), icon, None, urgency, None)
+			xnotify.send(title, '1 new notification\n{0}'.format(format_time(item.dt)), icon, wx_icon, urgency, None)
 
 
 # Format notification
