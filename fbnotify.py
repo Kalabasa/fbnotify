@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
+from appdirs import *
+import pynotify
+
 import ConfigParser
-import time
-import urllib2
 import xml.etree.ElementTree as ElementTree
 import email.utils
-import pynotify
+import urllib2
+import time
 import os
 
 
@@ -16,12 +18,14 @@ class Config:
 		self.feed_url = ''
 		self.feed_interval = 60 * 4
 		self.show_content = True
-		self.itemize = 0
-		self.notif_interval = 2
+		self.itemize = 3
+		self.notif_interval = 3
 
 		# Read config file
 		if not os.path.exists(file):
 			print('FATAL: Config file {0} not found in {1}!'.format(file, os.getcwd()))
+			self.save(file)
+			print('Created new config file with default values')
 			quit()
 		cp = ConfigParser.RawConfigParser()
 		try:
@@ -95,16 +99,20 @@ class Config:
 
 		# Save changes due to constraints
 		if changed:
-			cp.set(feed_section, 'URL', self.feed_url)
-			cp.setint(feed_section, 'Interval', self.feed_interval)
-			cp.setboolean(notif_section, 'ShowContent', self.show_content)
-			cp.setint(notif_section, 'Itemize', self.itemize)
-			cp.setint(notif_section, 'Interval', self.notif_interval)
+			self.save(file)
 
-			cfg_file = open(file,'w')
-			cp.write(cfg_file)
-			cfg_file.close()
+	# Save current configuration to file
+	def save(self, file):
+		cp = ConfigParser.RawConfigParser()
+		cp.set(feed_section, 'URL', self.feed_url)
+		cp.setint(feed_section, 'Interval', self.feed_interval)
+		cp.setboolean(notif_section, 'ShowContent', self.show_content)
+		cp.setint(notif_section, 'Itemize', self.itemize)
+		cp.setint(notif_section, 'Interval', self.notif_interval)
 
+		cfg_file = open(file,'w')
+		cp.write(cfg_file)
+		cfg_file.close()
 
 # A notification
 class Item:
@@ -124,12 +132,12 @@ def main():
 
 	print('Initializing..')
 
-	work_dir = os.path.expanduser('~') + '/.fbnotify/'
+	work_dir = user_data_dir('fbnotify', 'Kalabasa')
 	if not os.path.isdir(work_dir):
 		os.makedirs(work_dir)
-		print('Created configuration directory {0}'.format(work_dir)
+		print('Created configuration directory {0}'.format(work_dir))
 	os.chdir(work_dir)
-	config = Config('fbnotify.cfg')
+	config = Config('fbnotify.conf')
 	pynotify.init('fbnotify')
 
 	print('')
@@ -217,6 +225,7 @@ def notify(notifs):
 			# Say that there are many notifications
 			notif = pynotify.Notification(title, "{0} new notifications".format(n), icon)
 			notif.show()
+			time.sleep(config.notif_interval)
 
 			# Enumerate notifications if enabled
 			if config.itemize >= n:
