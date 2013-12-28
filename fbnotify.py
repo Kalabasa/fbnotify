@@ -2,7 +2,6 @@
 
 import config
 
-import appdirs
 import xnotify
 
 import xml.etree.ElementTree as ElementTree
@@ -31,20 +30,8 @@ def main():
 
 	print('Initializing..')
 
-	dirs = appdirs.AppDirs('fbnotify', 'Kalabasa')
-	conf_dir = dirs.user_data_dir
-	cache_dir = dirs.user_cache_dir
-
-	if not os.path.isdir(conf_dir):
-		os.makedirs(conf_dir)
-		print('Created configuration directory {0}'.format(conf_dir))
-
-	if not os.path.isdir(cache_dir):
-		os.makedirs(cache_dir)
-		print('Created cache directory {0}'.format(cache_dir))
-
-	conf = config.Config(conf_dir + '/fbnotify.conf')
-	os.chdir(cache_dir)
+	conf = config.init()
+	print('Working directory: {0}'.format(os.getcwd()))
 
 	xnotify.init('kalabasa.fbnotify')
 
@@ -149,14 +136,14 @@ def poll(feed_url):
 				conf.check_interval = conf.check_interval * 3/2
 				if conf.check_interval > max_interval:
 					conf.check_interval = max_interval
-				print('Increased check_interval to {0}s'.format(conf.check_interval))
+				print('Increased check interval to {0}s'.format(conf.check_interval))
 		else:
 			min_interval = 15
 			if conf.check_interval > min_interval:
 				conf.check_interval = conf.check_interval * 1/6
 				if conf.check_interval < min_interval:
 					conf.check_interval = min_interval
-				print('Decreased check_interval to {0}s'.format(conf.check_interval))
+				print('Decreased check interval to {0}s'.format(conf.check_interval))
 
 	return True
 

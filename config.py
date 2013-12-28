@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import appdirs
+
 import ConfigParser
 import os
 
@@ -145,10 +147,71 @@ class Config:
 		print('Saved configuration to {0}'.format(self.file))
 
 
-# GUI Setup
-def setup():
-	return
+# Creates application directories and files
+def init():
+	dirs = appdirs.AppDirs('fbnotify', 'Kalabasa')
+	conf_dir = dirs.user_data_dir
+	cache_dir = dirs.user_cache_dir
 
+	if not os.path.isdir(conf_dir):
+		os.makedirs(conf_dir)
+		print('Created configuration directory {0}'.format(conf_dir))
+
+	if not os.path.isdir(cache_dir):
+		os.makedirs(cache_dir)
+		print('Created cache directory {0}'.format(cache_dir))
+
+	os.chdir(cache_dir)
+	return Config(conf_dir + '/fbnotify.conf')
+
+# Setup
+def setup():
+	cli_setup()
+	return
+	try:
+		import wx
+		wx_setup()
+	except ImportError:
+		cli_setup()
+
+def cli_setup():
+	print('fbnotify Setup')
+	print('')
+
+	conf = init()
+
+	response = 'y'
+	if True or not conf.feed_url:
+		print('Feed URL setup')
+		print('1. Go to fb.com/notifications to see Your Notifications.')
+		print('2. Find the RSS feed in "Get notifications via: ..."')
+		print('3. Copy the address of RSS feed.')
+		print('4. Paste it here.')
+		feed_url = raw_input('\tFeed URL [Blank to skip]: ')
+		print('')
+		print('Do you want to change advanced settings?')
+		response = raw_input('\t[y/n]').lower()
+		if response != 'y':
+			print('Interpreting vague answer as "No"')
+		print('')
+	if response == 'y':
+		print('fbnotify checks the notifications feed periodically.')
+		print('Enter the interval in seconds between checks')
+		check_interval = raw_input('\tInterval [Blank for default]: ')
+		dynamic_interval = not bool(check_interval)
+		print('')
+		print('Show content in notifications?')
+		show_content = raw_input('\tShow content [y/n]: ')
+		# TODO
+
+
+def wx_setup():
+	import wx
+
+	app = wx.App(False)
+	frame = wx.Frame(None, wx.ID_ANY, 'fbnotify Configuration')
+	frame.Show(True)
+	app.MainLoop()
 
 if __name__ == '__main__':
 	setup()
