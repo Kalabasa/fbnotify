@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from appdirs import *
-import pynotify
+import appdirs
+import xnotify
 
 import ConfigParser
 import xml.etree.ElementTree as ElementTree
@@ -135,7 +135,7 @@ def main():
 
 	print('Initializing..')
 
-	dirs = AppDirs('fbnotify', 'Kalabasa')
+	dirs = appdirs.AppDirs('fbnotify', 'Kalabasa')
 	conf_dir = dirs.user_data_dir
 	cache_dir = dirs.user_cache_dir
 
@@ -150,7 +150,7 @@ def main():
 	config = Config(conf_dir + '/fbnotify.conf')
 	os.chdir(cache_dir)
 
-	pynotify.init('fbnotify')
+	xnotify.init('xnotify')
 
 	print('')
 
@@ -234,32 +234,27 @@ def poll(feed_url):
 def notify(notifs):
 	title = "Facebook"
 	icon = "facebook"
+	urgency = 'NORMAL'
 
 	n = len(notifs)
 	if n > 0:
 		if n > 1: # Many notifications
 
 			# Say that there are many notifications
-			notif = pynotify.Notification(title, "{0} new notifications".format(n), icon)
-			notif.show()
-			time.sleep(config.notif_interval)
+			xnotify.send(title, "{0} new notifications".format(n), icon, None, urgency, config.notif_interval)
 
 			# Enumerate notifications if enabled
 			if config.itemize >= n:
 				for item in sorted(notifs, key=lambda x: x.time):
-					notif = pynotify.Notification(title, format_item(item), icon)
-					notif.show()
-					notif.set_timeout(config.notif_interval)
+					xnotify.send(title, format_item(item), icon, None, urgency, config.notif_interval)
 					time.sleep(config.notif_interval)
 
 		else: # Single notification
 
 			if config.show_content:
-				notif = pynotify.Notification(title, format_item(notifs[0]), icon)
+				xnotify.send(title, format_item(notifs[0]), icon, None, urgency, None)
 			else:
-				notif = pynotify.Notification(title, "1 new notification", icon)
-
-			notif.show()
+				xnotify.send(title, "1 new notification", icon, None, urgency, None)
 
 
 # Format notification
