@@ -7,6 +7,7 @@ import ConfigParser
 import xml.etree.ElementTree as ElementTree
 import email.utils
 import urllib2
+from datetime import datetime
 import time
 import os
 import sys
@@ -119,10 +120,10 @@ class Config:
 
 # A notification
 class Item:
-	def __init__(self, text, link, time):
+	def __init__(self, text, link, dt):
 		self.text = text
 		self.link = link
-		self.time = time;
+		self.dt = dt;
 
 
 # Global
@@ -175,7 +176,7 @@ def poll(feed_url):
 	try:
 		time_f = open(last_mod_path, 'r')
 		last_mod_str = time_f.readline()
-		last_mod = time.mktime(email.utils.parsedate(last_mod_str))
+		last_mod = time.mktime_tz(email.utils.parsedate_tz(last_mod_str))
 		time_f.close()
 	except IOError:
 		print('WARNING: Unable to open {0}'.format(last_mod_path))
@@ -201,7 +202,7 @@ def poll(feed_url):
 		return True
 
 	# Save the modification time of the feed
-	modified_str = feed.headers.get("Last-Modified")
+	modified_str = feed.headers.get('Last-Modified')
 	time_f = open(last_mod_path, 'w')
 	time_f.write(modified_str)
 	time_f.close
@@ -220,7 +221,10 @@ def poll(feed_url):
 		pub = email.utils.mktime_tz(email.utils.parsedate_tz(node.find('pubDate').text))
 		if pub <= last_mod:
 			break
-		news.append(Item(node.find('title').text, node.find('link').text, pub))
+		title = node.find('title').text
+		link = node.find('link').text
+		dt = datetime.fromtimestamp(pub)
+		news.append(Item(title, link, dt))
 
 	# Show notification about new items
 	n = len(news)
@@ -232,44 +236,60 @@ def poll(feed_url):
 
 # Show notifications
 def notify(notifs):
-	title = "Facebook"
-	icon = "facebook"
+	title = 'Facebook'
+	icon = 'facebook'
 	urgency = 'NORMAL'
 
 	n = len(notifs)
-	if n > 0:
-		if n > 1: # Many notifications
+	if n > 1: # Many notifications
 
-			# Say that there are many notifications
-			xnotify.send(title, "{0} new notifications".format(n), icon, None, urgency, config.notif_interval)
+		# Sort by time
+		notifs = sorted(notifs, key=lambda x: x.dt)
 
-			# Enumerate notifications if enabled
-			if config.itemize >= n:
-				for item in sorted(notifs, key=lambda x: x.time):
-					xnotify.send(title, format_item(item), icon, None, urgency, config.notif_interval)
-					time.sleep(config.notif_interval)
+		# Say that there are many notifications
+		xnotify.send(title, '{0} new notifications\n{1}'.format(n, format_time(notifs[0].dt)), icon, None, urgency, config.notif_interval)
 
-		else: # Single notification
+		# Enumerate notifications if enabled
+		if config.itemize >= n:
+			for item in notifs:
+				xnotify.send(title, format_item(item), icon, None, urgency, config.notif_interval)
+				time.sleep(config.notif_interval)
 
-			if config.show_content:
-				xnotify.send(title, format_item(notifs[0]), icon, None, urgency, None)
-			else:
-				xnotify.send(title, "1 new notification", icon, None, urgency, None)
+	elif n == 1: # Single notification
+
+		item = notifs[0]
+		if config.show_content:
+			xnotify.send(title, format_item(item), icon, None, urgency, None)
+		else:
+			xnotify.send(title, '1 new notification\n{0}'.format(format_time(item.dt)), icon, None, urgency, None)
 
 
 # Format notification
 def format_item(item):
 	text = item.text
 	text += '\n'
-	text += format_time(item.time)
+	text += format_time(item.dt)
 	return text
 
 
 # Format time as relative time
-def format_time(time):
-	current = time.localtime()
-	return "{0} seconds ago".format(time - current)
+def format_time(then):
+	now = datetime.now()
+	delta = now - then
+	if delta.days >= 1:
+		text = '{0} day{1} ago'.format(delta.days, '' if delta.days == 1 else 's')
+	elif delta.seconds >= 3600:
+		hours = delta.seconds / 3600
+		text = '{0} hour{1} ago'.format(hours, '' if hours == 1 else 's')
+	elif delta.seconds >= 60:
+		minutes = delta.seconds / 60
+		text = '{0} minute{1} ago'.format(minutes, '' if minutes == 1 else 's')
+	elif delta.seconds >= 30:
+		text = '{0} second{1} ago'.format(delta.seconds, '' if delta.seconds == 1 else 's')
+	else:
+		text = 'Just now'
+	return text
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()
