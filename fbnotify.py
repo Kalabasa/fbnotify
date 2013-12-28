@@ -6,6 +6,7 @@ import urllib2
 import xml.etree.ElementTree as ElementTree
 import email.utils
 import pynotify
+import os
 
 
 # Application configuration
@@ -19,11 +20,14 @@ class Config:
 		self.notif_interval = 2
 
 		# Read config file
+		if not os.path.exists(file):
+			print('FATAL: Config file {0} not found in {1}!'.format(file, os.getcwd()))
+			quit()
 		cp = ConfigParser.RawConfigParser()
 		try:
 			cp.read(file)
 		except ConfigParser.Error:
-			print('FATAL: Unable to read config file {0}'.format(file))
+			print('FATAL: Unable to read config file {0}!'.format(file))
 			quit()
 
 		# Constraints
@@ -120,6 +124,11 @@ def main():
 
 	print('Initializing..')
 
+	work_dir = os.path.expanduser('~') + '/.fbnotify/'
+	if not os.path.isdir(work_dir):
+		os.makedirs(work_dir)
+		print('Created configuration directory {0}'.format(work_dir)
+	os.chdir(work_dir)
 	config = Config('fbnotify.cfg')
 	pynotify.init('fbnotify')
 
