@@ -5,6 +5,7 @@ from item import Item
 
 import xnotify
 
+from threading import Thread
 import xml.etree.ElementTree as ElementTree
 import email.utils
 import urllib2
@@ -25,13 +26,18 @@ def main():
 	print('Initializing..')
 
 	conf = config.init()
-	sys_notif = xnotify.SysNotif('fbnotify')
+	sys_notif = xnotify.SysNotif('fbnotify', 'facebook', '/usr/share/icons/elementary-xfce/social/16/facebook.png')
 	print('Working directory: {0}'.format(os.getcwd()))
 
 	print('')
 
 	sys_notif.set_tooltip('fbnotify\nNo new notifications')
 
+	t = Thread(target=main_loop)
+	t.start()
+
+
+def main_loop():
 	try:
 		while poll(conf.feed_url):
 			time.sleep(conf.check_interval)
@@ -42,7 +48,6 @@ def main():
 		print('')
 		sys_notif.stop()
 		quit()
-
 
 # Checks and notifies new notifications
 def poll(feed_url):
@@ -130,14 +135,14 @@ def poll(feed_url):
 		if n == 0:
 			max_interval = 60 * 20
 			if conf.check_interval < max_interval:
-				conf.check_interval = conf.check_interval * 2/1
+				conf.check_interval = conf.check_interval * 9/5
 				if conf.check_interval > max_interval:
 					conf.check_interval = max_interval
 				print('Increased check interval to {0}s'.format(conf.check_interval))
 		else:
 			min_interval = 15
 			if conf.check_interval > min_interval:
-				conf.check_interval = conf.check_interval * 1/6
+				conf.check_interval = conf.check_interval * 1/5
 				if conf.check_interval < min_interval:
 					conf.check_interval = min_interval
 				print('Decreased check interval to {0}s'.format(conf.check_interval))
@@ -148,8 +153,6 @@ def poll(feed_url):
 # Show notifications
 def notify(notifs):
 	title = 'fbnotify'
-	icon = 'facebook'
-	wx_icon = None # TODO ???
 	urgency = 'NORMAL'
 
 	n = len(notifs)
@@ -157,12 +160,12 @@ def notify(notifs):
 
 		# Notify
 		dt = notifs[n-1].dt # Earliest
-		sys_notif.send('{0} new notifications'.format(n), format_time(dt), icon, wx_icon, urgency, conf.item_interval)
+		sys_notif.send('{0} new notifications'.format(n), format_time(dt),urgency, conf.item_interval)
 
 		# Enumerate notifications if enabled
 		if conf.itemize >= n:
 			for item in sorted(notifs, key=lambda x: x.dt):
-				sys_notif.send(title, format_item(item), icon, wx_icon, urgency, conf.item_interval)
+				sys_notif.send(title, format_item(item), urgency, conf.item_interval)
 				time.sleep(conf.item_interval)
 
 	elif n == 1: # Single notification
@@ -171,7 +174,7 @@ def notify(notifs):
 		if conf.show_content:
 			sys_notif.send(title, format_item(item), icon, wx_icon, urgency, None)
 		else:
-			sys_notif.send('1 new notification', format_time(item.dt), icon, wx_icon, urgency, None)
+			sys_notif.send('1 new notification', format_time(item.dt), urgency, None)
 
 	# Set the tooltip
 	tooltip = 'fbnotify'
