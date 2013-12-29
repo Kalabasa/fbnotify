@@ -30,14 +30,7 @@ def main():
 	print('Working directory: {0}'.format(os.getcwd()))
 
 	print('')
-
-	sys_notif.set_tooltip('fbnotify\nNo new notifications')
-
-	t = Thread(target=main_loop)
-	t.start()
-
-
-def main_loop():
+	
 	try:
 		while poll(conf.feed_url):
 			time.sleep(conf.check_interval)
@@ -46,7 +39,6 @@ def main_loop():
 		print('')
 		print('Stopped')
 		print('')
-		sys_notif.stop()
 		quit()
 
 # Checks and notifies new notifications
@@ -176,14 +168,6 @@ def notify(notifs):
 		else:
 			sys_notif.send('1 new notification', format_time(item.dt), urgency, None)
 
-	# Set the tooltip
-	tooltip = 'fbnotify'
-	tooltip += '\n{0} notification{1}'.format(n, '' if n == 1 else 's')
-	tooltip += '\n{0}'.format(format_time(notifs[n-1].dt))
-	sys_notif.set_tooltip(tooltip)
-
-	# Set list of items
-	sys_notif.add_items(notifs)
 
 # Format notification
 def format_item(item):
