@@ -3,9 +3,6 @@ import webbrowser
 
 # Try to import libraries
 pynotify = Growl = gntp = None
-
-# Notification
-# ============
 loaded = False
 
 # pynotify (Linux)
@@ -92,3 +89,7 @@ class SysNotif:
 				sticky = False,
 				priority = 1,
 			)
+
+	else:
+		def send(self, title, message, urgency=None, timeout=None):
+			pass
