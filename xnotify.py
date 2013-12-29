@@ -1,3 +1,5 @@
+import webbrowser
+
 try:
 	import pynotify
 except ImportError:
@@ -17,6 +19,7 @@ class SysNotif:
 		# Initialize notification library
 		pynotify.init(app_name)
 		self.app_name = app_name
+		self.link = None
 
 		if gtk:
 			self._init_gtk()
@@ -26,6 +29,8 @@ class SysNotif:
 		self.gtk_notif_icon = si = gtk.StatusIcon()
 		si.set_from_icon_name('facebook')
 		si.set_visible(True)
+		si.connect('activate', self.gtk_activate)
+		si.connect('popup-menu', self.gtk_popup_menu)
 
 		# Start gtk.main
 		self.gtk_thread = Thread(target=gtk.main)
@@ -46,6 +51,30 @@ class SysNotif:
 				n.set_timeout(timeout)
 			n.show()
 
+	def set_link(self, link):
+		self.link = link
+
 	def set_tooltip(self, text):
 		if gtk:
 			self.gtk_notif_icon.set_tooltip(text)
+
+	def activate(self):
+		if self.link:
+				webbrowser.open(self.link, 2)
+	
+	if gtk:
+		def gtk_activate(self, icon):
+			self.activate()
+
+		def gtk_popup_menu(self, icon, button, time):
+			menu = gtk.Menu()
+
+			about = gtk.MenuItem("About")
+			quit = gtk.MenuItem("Quit")
+
+			menu.append(about)
+			menu.append(quit)
+
+			menu.show_all()
+
+			menu.popup(None, None, gtk.status_icon_position_menu, button, time, self.gtk_notif_icon)

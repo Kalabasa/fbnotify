@@ -180,10 +180,14 @@ def notify(notifs):
 		else:
 			sys_notif.send('1 new notification', format_time(item.dt), icon, wx_icon, urgency, None)
 
+	# Set the tooltip
 	tooltip = 'fbnotify'
 	tooltip += '\n{0} notification{1}'.format(n, '' if n == 1 else 's')
 	tooltip += '\n{0}'.format(format_time(notifs[n-1].dt))
 	sys_notif.set_tooltip(tooltip)
+
+	# Set the shortcut link
+	sys_notif.set_link(notifs[0].link)
 
 # Format notification
 def format_item(item):
