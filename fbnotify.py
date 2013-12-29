@@ -5,7 +5,6 @@ from item import Item
 
 import xnotify
 
-from threading import Thread
 import xml.etree.ElementTree as ElementTree
 import email.utils
 import urllib2
@@ -30,7 +29,7 @@ def main():
 	print('Working directory: {0}'.format(os.getcwd()))
 
 	print('')
-	
+
 	try:
 		while poll(conf.feed_url):
 			time.sleep(conf.check_interval)
