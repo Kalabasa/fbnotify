@@ -42,6 +42,7 @@ class SysNotif:
 		self.app_name = app_name
 		self.xdg_icon = xdg_icon
 		self.icon_path = icon_path
+		self.icon_data = open(icon_path, 'rb').read()
 
 		# Initialize notification library
 		if pynotify:
@@ -68,13 +69,8 @@ class SysNotif:
 		self.gntp_notifier.register()
 
 
-	############################################################################
-	# Application functions
-	############################################################################
-
-	def send(self, title, message, urgency=None, timeout=None):
-		if pynotify:
-
+	if pynotify:
+		def send(self, title, message, urgency=None, timeout=None):
 			n = pynotify.Notification(title, message, self.xdg_icon)
 			if urgency:
 				n.set_urgency(getattr(pynotify, 'URGENCY_%s' % urgency.upper()))
@@ -82,17 +78,17 @@ class SysNotif:
 				n.set_timeout(timeout)
 			n.show()
 
-		elif Growl:
-
+	elif Growl:
+		def send(self, title, message, urgency=None, timeout=None):
 			self.growl.notify('fbnotify', title, message)
 
-		elif gntp:
-
+	elif gntp:
+		def send(self, title, message, urgency=None, timeout=None):
 			self.gntp_notifier.notify(
 				noteType = "New Notifications",
 				title = title,
 				description = message,
-				icon = "http://example.com/icon.png",
+				icon = self.icon_data,
 				sticky = False,
 				priority = 1,
 			)
