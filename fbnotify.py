@@ -7,7 +7,7 @@ import xnotify
 import xml.etree.ElementTree as ElementTree
 import email.utils
 import urllib2
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import os
 
@@ -22,20 +22,22 @@ class Item:
 
 # Global
 conf = None
+sys_notif = None
 
 
 # Main function
 def main():
-	global conf
+	global conf, sys_notif
 
 	print('Initializing..')
 
 	conf = config.init()
+	sys_notif = xnotify.SysNotif('fbnotify')
 	print('Working directory: {0}'.format(os.getcwd()))
 
-	xnotify.init('kalabasa.fbnotify')
-
 	print('')
+
+	sys_notif.set_tooltip('fbnotify\nNo new notifications')
 
 	try:
 		while poll(conf.feed_url):
@@ -45,6 +47,8 @@ def main():
 		print('')
 		print('Stopped')
 		print('')
+		sys_notif.stop()
+		quit()
 
 
 # Checks and notifies new notifications
@@ -88,7 +92,7 @@ def poll(feed_url):
 			return False;
 	except IOError as e:
 		# Connection error
-		print('WARNING: IOError' + e)
+		print('WARNING: IOError' + str(e))
 		print('Unable to load feed URL')
 		return True
 
@@ -103,7 +107,7 @@ def poll(feed_url):
 		# If first run or no last mod
 		if last_mod == 0:
 			print 'Skipping all previous notifications..'
-			return True
+			#return True
 
 		# Read and parse the feed
 		xml = feed.read()
@@ -133,7 +137,7 @@ def poll(feed_url):
 		if n == 0:
 			max_interval = 60 * 20
 			if conf.check_interval < max_interval:
-				conf.check_interval = conf.check_interval * 3/2
+				conf.check_interval = conf.check_interval * 2/1
 				if conf.check_interval > max_interval:
 					conf.check_interval = max_interval
 				print('Increased check interval to {0}s'.format(conf.check_interval))
@@ -158,26 +162,28 @@ def notify(notifs):
 	n = len(notifs)
 	if n > 1: # Many notifications
 
-		# Sort by time
-		notifs = sorted(notifs, key=lambda x: x.dt)
-
-		# Say that there are many notifications
-		xnotify.send(title, '{0} new notifications\n{1}'.format(n, format_time(notifs[0].dt)), icon, wx_icon, urgency, conf.item_interval)
+		# Notify
+		dt = notifs[n-1].dt # Earliest
+		sys_notif.send('{0} new notifications'.format(n), format_time(dt), icon, wx_icon, urgency, conf.item_interval)
 
 		# Enumerate notifications if enabled
 		if conf.itemize >= n:
-			for item in notifs:
-				xnotify.send(title, format_item(item), icon, wx_icon, urgency, conf.item_interval)
+			for item in sorted(notifs, key=lambda x: x.dt):
+				sys_notif.send(title, format_item(item), icon, wx_icon, urgency, conf.item_interval)
 				time.sleep(conf.item_interval)
 
 	elif n == 1: # Single notification
 
 		item = notifs[0]
 		if conf.show_content:
-			xnotify.send(title, format_item(item), icon, wx_icon, urgency, None)
+			sys_notif.send(title, format_item(item), icon, wx_icon, urgency, None)
 		else:
-			xnotify.send(title, '1 new notification\n{0}'.format(format_time(item.dt)), icon, wx_icon, urgency, None)
+			sys_notif.send('1 new notification', format_time(item.dt), icon, wx_icon, urgency, None)
 
+	tooltip = 'fbnotify'
+	tooltip += '\n{0} notification{1}'.format(n, '' if n == 1 else 's')
+	tooltip += '\n{0}'.format(format_time(notifs[n-1].dt))
+	sys_notif.set_tooltip(tooltip)
 
 # Format notification
 def format_item(item):

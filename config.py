@@ -187,6 +187,7 @@ def cli_setup():
 		print('2. Find the RSS feed in "Get notifications via: ..."')
 		print('3. Copy the address of RSS feed.')
 		print('4. Paste it here.')
+		print('KEEP THIS URL SECRET since it contains your private feed')
 		feed_url = raw_input('\tFeed URL [Blank to skip]: ')
 		print('')
 		print('Do you want to change advanced settings?')
