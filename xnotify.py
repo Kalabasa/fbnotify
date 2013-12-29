@@ -1,3 +1,5 @@
+from item import Item
+
 import webbrowser
 
 try:
@@ -20,6 +22,7 @@ class SysNotif:
 		pynotify.init(app_name)
 		self.app_name = app_name
 		self.link = None
+		self.items = []
 
 		if gtk:
 			self._init_gtk()
@@ -51,29 +54,34 @@ class SysNotif:
 				n.set_timeout(timeout)
 			n.show()
 
-	def set_link(self, link):
-		self.link = link
+	def add_items(self, items):
+		self.items.extend(reverse(items))
+		del self.items[10:]
 
 	def set_tooltip(self, text):
 		if gtk:
 			self.gtk_notif_icon.set_tooltip(text)
-
-	def activate(self):
-		if self.link:
-				webbrowser.open(self.link, 2)
 	
 	if gtk:
 		def gtk_activate(self, icon):
-			self.activate()
+			return
 
 		def gtk_popup_menu(self, icon, button, time):
 			menu = gtk.Menu()
 
-			about = gtk.MenuItem("About")
-			quit = gtk.MenuItem("Quit")
+			if self.items:
+				for item in self.items:
+					menu_item = gtk.MenuItem(item.text)
+					menu.append(menu_item)
+				menu.append(gtk.SeparatorMenuItem())
 
-			menu.append(about)
-			menu.append(quit)
+			go_item = gtk.MenuItem("Launch Facebook Website")
+			about_item = gtk.MenuItem("About")
+			quit_item = gtk.MenuItem("Quit")
+
+			menu.append(go_item)
+			menu.append(about_item)
+			menu.append(quit_item)
 
 			menu.show_all()
 

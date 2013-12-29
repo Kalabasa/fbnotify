@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import config
+from item import Item
 
 import xnotify
 
@@ -10,14 +11,6 @@ import urllib2
 from datetime import datetime, timedelta
 import time
 import os
-
-
-# A notification
-class Item:
-	def __init__(self, text, link, dt):
-		self.text = text
-		self.link = link
-		self.dt = dt
 
 
 # Global
@@ -186,8 +179,8 @@ def notify(notifs):
 	tooltip += '\n{0}'.format(format_time(notifs[n-1].dt))
 	sys_notif.set_tooltip(tooltip)
 
-	# Set the shortcut link
-	sys_notif.set_link(notifs[0].link)
+	# Set list of items
+	sys_notif.add_items(notifs)
 
 # Format notification
 def format_item(item):
