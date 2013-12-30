@@ -13,29 +13,18 @@ import time
 import os
 
 
-""" Main notifier app """
-class Notifier(wx.App):
-	def __init__(self):
-		wx.App.__init__(self, redirect=0)
+""" feed getter """
+class Feeder:
+	def __init__(self, conf):
+		self.conf = conf
 
-		self.conf = config.init()
+		# test URL
+		request = urllib2.Request(self.conf.feed_url)
+		opener = urllib2.build_opener()
+		feed = opener.open(request)
 
-		self.timer = wx.Timer(self, wx.NewId())
-		self.Bind(wx.EVT_TIMER, self.check, self.timer)
-		self.check()
-		self.MainLoop()
 
-	def check(self, event=None):
-		if self.poll(self.conf.feed_url):
-			self.timer.Start(self.conf.check_interval, True)
-		else:
-			close()
-
-	def close(self):
-		print('Exiting')
-		self.Exit()
-
-	def poll(self, feed_url):
+	def poll(self):
 		print('Checking for new notifications..')
 		last_mod_path = os.path.abspath('.last-modified')
 
@@ -54,32 +43,29 @@ class Notifier(wx.App):
 		# Read feed from URL
 		is_modified = True
 		try:
-			request = urllib2.Request(feed_url)
+			request = urllib2.Request(self.conf.feed_url)
 			if last_mod != 0:
 				request.add_header('If-Modified-Since', last_mod_str)
 			opener = urllib2.build_opener()
 			feed = opener.open(request)
-		except ValueError:
-			# Invaid URL value
-			print('FATAL: Invalid feed url')
-			return False
 		except urllib2.HTTPError as e:
 			# HTTP status not OK
 			if e.code == 304: # Not modified
 				is_modified = False
 			else:
-				print('FATAL: HTTPError' + str(e))
+				print('WARNING: HTTPError' + str(e))
 				print('Unable to load feed URL')
 				print('HTTP status {0}'.format(e.code))
 				print('Reason {0}'.format(str(e.reason)))
-				return False;
+				return [];
 		except IOError as e:
 			# Connection error
 			print('WARNING: IOError' + str(e))
 			print('Unable to load feed URL')
-			return True
+			return []
 
 		n = 0
+		news = []
 		if is_modified:
 			# Save the modification time of the feed
 			modified_str = feed.headers.get('Last-Modified')
@@ -97,7 +83,6 @@ class Notifier(wx.App):
 			tree = ElementTree.fromstring(xml)
 
 			# Get new items
-			news = []
 			for node in tree.iter('item'):
 				pub = email.utils.mktime_tz(email.utils.parsedate_tz(node.find('pubDate').text))
 				if pub <= last_mod:
@@ -110,7 +95,6 @@ class Notifier(wx.App):
 			# Show notification about new items
 			n = len(news)
 			print('{0} new [{1}]'.format(n, time.strftime('%T')))
-			notify(news)
 		else:
 			# Not modified -> no new notifications
 			print('None [{0}]'.format(time.strftime('%T')))
@@ -132,7 +116,4 @@ class Notifier(wx.App):
 						self.conf.check_interval = min_interval
 					print('Decreased check interval to {0}s'.format(self.conf.check_interval))
 
-		return True
-
-
-notifier = Notifier()
+		return news
