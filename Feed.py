@@ -1,62 +1,54 @@
 from Item import Item
 
+from datetime import datetime, timedelta
+import xml.etree.ElementTree as ElementTree
+import email.utils
 import urllib2
-import httplib
-
-class HeadRequest(urllib2.Request):
-	''' Request headers of URL instead of content '''
-	def get_method(self):
-		return "HEAD"
+import time
+import os
 
 class Feed:
-	''' The notifications feed '''
+	''' the notifications feed '''
 
 	def __init__(self, feed_url):
 		self.feed_url = feed_url
-		self.test_feed_url()
+		self.link = ''
 
-	def test_feed_url(self):
-		code = urllib2.urlopen(HeadRequest(self.feed_url)).info
-		if code != 200:
-			return False
-		
 
 	def get_new_items(self):
+		''' returns new items from the feed '''
+
 		last_mod_path = os.path.abspath('.last-modified')
 
 		# Get the modification time of the feed for the last time I checked
 		last_mod_str = None
 		last_mod = 0
 		try:
-			time_f = open(last_mod_path, 'r')
-			last_mod_str = time_f.readline()
+			last_mod_str = open(last_mod_path, 'r').readline()
 			last_mod = email.utils.mktime_tz(email.utils.parsedate_tz(last_mod_str))
-			time_f.close()
 		except IOError:
-			print('ERROR: Unable to open {0}'.format(last_mod_path))
+			print('WARNING: Unable to open ' + last_mod_path)
+			print('A new file is created')
+			last_mod = time.mktime(time.localtime())
+			last_mod_str = email.utils.formatdate(last_mod)
+			open(last_mod_path, 'w').write(last_mod_str)
+			
 
 		# Read feed from URL
 		is_modified = True
 		try:
 			request = urllib2.Request(self.feed_url)
-			if last_mod != 0:
-				request.add_header('If-Modified-Since', last_mod_str)
+			request.add_header('If-Modified-Since', last_mod_str)
 			opener = urllib2.build_opener()
 			feed = opener.open(request)
 		except urllib2.HTTPError as e:
-			# HTTP status not OK
 			if e.code == 304: # Not modified
 				is_modified = False
-			else:
-				print('ERROR: HTTPError ' + str(e))
-				print('Unable to load feed URL')
-				print('Code: {0}'.format(e.code))
-				print('Reason: {0}'.format(str(e.reason)))
-				return [];
+			else: # Bad HTTP status
+				raise e
 		except IOError as e:
 			# Connection error
-			print('ERROR: IOError ' + str(e))
-			print('Unable to load feed URL')
+			print('ERROR: Unable to load feed URL')
 			return []
 
 		n = 0
@@ -64,17 +56,14 @@ class Feed:
 		if is_modified:
 			# Save the modification time of the feed
 			modified_str = feed.headers.get('Last-Modified')
-			time_f = open(last_mod_path, 'w')
-			time_f.write(modified_str)
-			time_f.close
-
-			# If first run or no last mod
-			if last_mod == 0:
-				return []
+			open(last_mod_path, 'w').write(modified_str)
 
 			# Read and parse the feed
 			xml = feed.read()
 			tree = ElementTree.fromstring(xml)
+
+			# Get link
+			self.link = tree[0].find('link').text
 
 			# Get new items
 			for node in tree.iter('item'):
