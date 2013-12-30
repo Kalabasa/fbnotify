@@ -10,6 +10,9 @@ import os
 class Feed:
 	''' the notifications feed '''
 
+	feed_url = ''
+	link = ''
+
 	def __init__(self, feed_url):
 		self.feed_url = feed_url
 		self.link = ''

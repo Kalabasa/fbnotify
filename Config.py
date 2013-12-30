@@ -1,5 +1,4 @@
 import ConfigParser
-import collections
 import os
 
 class FeedConfig:

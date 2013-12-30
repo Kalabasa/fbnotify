@@ -1,20 +1,24 @@
 from Feed import Feed
 from Config import Config
+from PluginManager import PluginManager
 
 import appdirs
 
+from datetime import datetime,timedelta
+import urllib2
 import time
 import os
 
 class Notifier:
 	''' main class '''
 
+	plugin_man = None
+	conf = None
+	feed = None
+
 	def __init__(self):
 		dirs = self.init_dirs()
-		os.chdir(dirs.user_cache_dir)
-		conf_file_path  = dirs.user_data_dir + '/fbnotify.conf'
-
-		print('Working directory: ' + os.getcwd())
+		conf_file_path  = os.path.join(dirs.user_data_dir, 'fbnotify.conf')
 		print('Data directory: ' + dirs.user_data_dir)
 		print('Cache directory: ' + dirs.user_cache_dir)
 		print('Configuration file: ' + conf_file_path)
@@ -22,29 +26,84 @@ class Notifier:
 
 		print('Initializing config...')
 		self.conf = Config(conf_file_path)
-		print('')
-
 		print('Initializing feed...')
 		self.feed = Feed(self.conf.feed.url)
+		print('Initializing plugins...')
+		self.plugin_man = PluginManager()
+		self.plugin_man.load_all()
 		print('')
+
+		os.chdir(dirs.user_cache_dir)
+		print('Working directory: ' + os.getcwd())
+		print('')
+
 
 	def start(self):
 		try:
 			while True:
 				print('Checking for new notifications...')
+
 				new_items = self.feed.get_new_items()
-				print('{0} new'.format(len(new_items)))
-				if new_items:
-					# NOTIFY
-					print(new_items)
+				self.notify_items(new_items)
 				self.adjust_interval(len(new_items))
+
+				print('{0} new'.format(len(new_items)))
+
 				time.sleep(self.conf.feed.check_interval)
 				print('')
 		except KeyboardInterrupt:
+			self.plugin_man.unload_all()
 			print('')
 			print('Stopped')
 			print('')
 			pass
+
+
+	def notify_items(self, items):
+		''' shows notifications about items '''
+
+		n = len(items)
+		if n > 1: # Many notifications
+
+			# Declare multiple notifications
+			dt = items[n-1].dt # Earliest
+			notify('{0} new notifications'.format(n), format_time(dt))
+
+			# Enumerate notifications if enabled
+			interval = self.conf.notification.item_interval
+			if self.conf.notification.itemize >= n:
+				for item in sorted(items, key=lambda x: x.dt):
+					notify(item.text, format_time(item.dt), interval)
+					time.sleep(interval)
+
+		elif n == 1: # Single notification
+
+			item = items[0]
+			if conf.show_content:
+				notify(item.text, format_time(item.dt))
+			else:
+				notify('1 new notification', format_time(item.dt))
+
+
+	def notify(self, title, body, timeout=10):
+		''' shows a notification '''
+
+		# Set icon
+		xdg_icon = 'facebook'
+		icon_path = None
+		icon_data = open(icon_path, 'rb').read() if icon_path else None
+
+		# This will send a message to any plugin
+		# listening to the 'notification' channel
+		self.plugin_man.resource.send(
+			'notification',
+			title = title,
+			body = body,
+			timeout = timeout,
+			xdg_icon = xdg_icon,
+			icon_path = icon_path,
+			icon_data = icon_data,
+		)
 
 
 	def adjust_interval(self, new):
@@ -85,3 +144,23 @@ class Notifier:
 			os.makedirs(cache_dir)
 
 		return dirs
+
+
+	def format_time(then):
+		''' Formats relative time to the specified time '''
+
+		now = datetime.now()
+		delta = now - then
+		if delta.days >= 1:
+			text = '{0} day{1} ago'.format(delta.days, '' if delta.days == 1 else 's')
+		elif delta.seconds >= 3600:
+			hours = delta.seconds / 3600
+			text = '{0} hour{1} ago'.format(hours, '' if hours == 1 else 's')
+		elif delta.seconds >= 60:
+			minutes = delta.seconds / 60
+			text = '{0} minute{1} ago'.format(minutes, '' if minutes == 1 else 's')
+		elif delta.seconds >= 30:
+			text = '{0} second{1} ago'.format(delta.seconds, '' if delta.seconds == 1 else 's')
+		else:
+			text = 'Just now'
+		return text
