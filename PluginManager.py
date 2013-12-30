@@ -17,6 +17,7 @@ class PluginManager:
 
 	dirs = []
 	resource = None
+	_plugins = []
 	_active = []
 
 	def __init__(self, dirs=None):
@@ -27,10 +28,60 @@ class PluginManager:
 		self.resource = PluginResource()
 
 
-	def find(self):
-		''' returns a list of PluginData from plugins found '''
+	def get_plugins(self):
+		if not self._plugins:
+			self.refresh_plugins_list()
+		return self._plugins
 
-		plugins = []
+
+	def load(self, plugin_data):
+		''' loads a plugin '''
+
+		module = imp.load_module(plugin_data.file_name, *plugin_data.module)
+		plugin = module.Plugin()
+		self._active.append(plugin)
+
+		depend = plugin.plugin_dependencies()
+
+		plugin._resource = self.resource
+		plugin.__thread = Thread(target=lambda: self._start(plugin))
+		plugin.__thread.start()
+
+		print('Loaded ' + plugin_data.name + ' plugin')
+
+		return plugin
+
+	def load_by_name(self, name):
+		''' loads a plugin '''
+		for p in self.get_plugins():
+			if p.name == name:
+				self.load(p)
+
+	def load_all(self):
+		''' loads all plugins '''
+		for p in self.get_plugins():
+			self.load(p)
+
+
+	def unload(self, plugin):
+		''' unloads a plugin '''
+
+		self._active.remove(plugin)
+
+		plugin.plugin_destroy()
+		plugin.__thread.join()
+		plugin._resource = None
+
+	def unload_all(self):
+		''' unloads all plugins '''
+		for p in self._active:
+			self.unload(p)
+
+
+	def refresh_plugins_list(self):
+		''' refreshes the list of PluginData from plugins found '''
+
+		del self._plugins[:]
 		plugin_matcher = re.compile(r'^(.*_?plugin)\.pyc?$', re.IGNORECASE)
 
 		for directory in self.dirs:
@@ -52,48 +103,14 @@ class PluginManager:
 				info = imp.find_module(file_name, [location])
 
 				plugin_data = PluginData(name=entry, file_name=file_name, module=info)
-				plugins.append(plugin_data)
+				self._plugins.append(plugin_data)
 
-		return plugins
 
-	def load(self, plugin_data):
-		''' loads a plugin '''
+	def _start(self, plugin):
+		''' starts a plugin directly '''
 
-		module = imp.load_module(plugin_data.file_name, *plugin_data.module)
-		plugin = module.Plugin()
-		self._active.append(plugin)
-
-		depend = plugin.plugin_dependencies()
-
-		plugin._resource = self.resource
-		plugin.__thread = Thread(target=plugin.plugin_init)
-		plugin.__thread.start()
-
-		print('Loaded ' + plugin_data.name + ' plugin')
-
-		return plugin
-
-	def load_by_name(self, name):
-		''' loads a plugin '''
-		for p in self.find():
-			if p.name == name:
-				self.load(p)
-
-	def load_all(self):
-		''' loads all plugins '''
-		for p in self.find():
-			self.load(p)
-
-	def unload(self, plugin):
-		''' unloads a plugin '''
-
-		self._active.remove(plugin)
-
-		plugin.plugin_destroy()
-		plugin.__thread.join()
-		plugin._resource = None
-
-	def unload_all(self):
-		''' unloads all plugins '''
-		for p in self._active:
-			self.unload(p)
+		# Terminate the plugin on ^C
+		try:
+			plugin.plugin_init()
+		except KeyboardInterrupt:
+			pass

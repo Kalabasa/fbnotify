@@ -32,7 +32,7 @@ class Feed:
 		except IOError:
 			print('WARNING: Unable to open ' + last_mod_path)
 			print('A new file is created')
-			last_mod = time.mktime(time.localtime())
+			last_mod = 0#time.mktime(time.localtime())
 			last_mod_str = email.utils.formatdate(last_mod)
 			open(last_mod_path, 'w').write(last_mod_str)
 			

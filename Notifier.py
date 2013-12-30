@@ -47,8 +47,6 @@ class Notifier:
 				self.notify_items(new_items)
 				self.adjust_interval(len(new_items))
 
-				print('{0} new'.format(len(new_items)))
-
 				time.sleep(self.conf.feed.check_interval)
 				print('')
 		except KeyboardInterrupt:
@@ -63,26 +61,29 @@ class Notifier:
 		''' shows notifications about items '''
 
 		n = len(items)
+
+		print('{0} notification{1}'.format(n, '' if n == 1 else 's'))
+
 		if n > 1: # Many notifications
 
 			# Declare multiple notifications
 			dt = items[n-1].dt # Earliest
-			notify('{0} new notifications'.format(n), format_time(dt))
+			self.notify('{0} new notifications'.format(n), self.format_time(dt))
 
 			# Enumerate notifications if enabled
 			interval = self.conf.notification.item_interval
 			if self.conf.notification.itemize >= n:
 				for item in sorted(items, key=lambda x: x.dt):
-					notify(item.text, format_time(item.dt), interval)
+					self.notify(item.text, self.format_time(item.dt), interval)
 					time.sleep(interval)
 
 		elif n == 1: # Single notification
 
 			item = items[0]
 			if conf.show_content:
-				notify(item.text, format_time(item.dt))
+				self.notify(item.text, self.format_time(item.dt))
 			else:
-				notify('1 new notification', format_time(item.dt))
+				self.notify('1 new notification', self.format_time(item.dt))
 
 
 	def notify(self, title, body, timeout=10):
@@ -146,7 +147,7 @@ class Notifier:
 		return dirs
 
 
-	def format_time(then):
+	def format_time(self, then):
 		''' Formats relative time to the specified time '''
 
 		now = datetime.now()

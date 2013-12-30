@@ -1,7 +1,7 @@
 from Queue import Queue
 import collections
 
-PluginChannel = collections.namedtuple('PluginChannel', ['plugin', 'queue'])
+PluginChannel = collections.namedtuple('PluginChannel', ['plugin', 'channel', 'queue'])
 
 class PluginResource:
 	'''
@@ -26,7 +26,7 @@ class PluginResource:
 
 		while not handle.queue.empty():
 			kwargs = handle.queue.get()
-			handle.plugin.receive_message(**kwargs)
+			handle.plugin.plugin_receive(handle.channel, **kwargs)
 
 	def register_listener(self, plugin, channel):
 		'''
@@ -37,8 +37,9 @@ class PluginResource:
 		if not channel in self._listeners:
 			self._listeners[channel] = []
 
-		pc = PluginChannel(plugin=plugin, queue=Queue())
+		pc = PluginChannel(plugin=plugin, channel=channel, queue=Queue())
 		self._listeners[channel].append(pc)
+
 		return pc
 
 	def unregister_listener(self, handle):

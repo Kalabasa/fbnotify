@@ -5,7 +5,11 @@ class PluginBase:
 	__thread = None
 
 	def plugin_init(self):
-		''' initialize anything here '''
+		'''
+		initialize anything here
+		this method can run until plugin_destroy is called
+		when plugin_destroy is called, this method must terminate 
+		'''
 		raise NotImplementedError()
 
 	def plugin_destroy(self):
@@ -19,6 +23,6 @@ class PluginBase:
 		'''
 		raise NotImplementedError()
 
-	def plugin_receive(self, **kwargs):
+	def plugin_receive(self, channel, **msg):
 		''' called to receive a message from the plugin messaging system '''
 		pass
