@@ -1,9 +1,16 @@
 fbnotify
 ========
 
-Work-in-progess.
+Work-in-progess. Still incomplete!
 
-Notifier when you get a notification in Facebook using desktop notifications
+Facebook desktop notifier.
+
+Usage
+=====
+
+Use at your own risk. This is a work-in-progress.
+
+`./main.py`
 
 Libraries
 =========

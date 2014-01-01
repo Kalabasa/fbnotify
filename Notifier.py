@@ -6,36 +6,62 @@ import appdirs
 
 from datetime import datetime,timedelta
 import urllib2
+import traceback
 import time
 import os
 
 class Notifier:
 	''' main class '''
 
+	exec_dir = os.getcwd()
 	plugin_man = None
 	conf = None
 	feed = None
 
 	def __init__(self):
-		dirs = self.init_dirs()
-		conf_file_path  = os.path.join(dirs.user_data_dir, 'fbnotify.conf')
-		print('Data directory: ' + dirs.user_data_dir)
-		print('Cache directory: ' + dirs.user_cache_dir)
-		print('Configuration file: ' + conf_file_path)
-		print('')
+		try:
+			os.umask(0644)
 
-		print('Initializing config...')
-		self.conf = Config(conf_file_path)
-		print('Initializing feed...')
-		self.feed = Feed(self.conf.feed.url)
-		print('Initializing plugins...')
-		self.plugin_man = PluginManager()
-		self.plugin_man.load_all()
-		print('')
+			print('Initializing directories...')
+			print('Working directory: ' + os.getcwd())
 
-		os.chdir(dirs.user_cache_dir)
-		print('Working directory: ' + os.getcwd())
-		print('')
+			dirs = self.init_dirs()
+			os.chdir(dirs.user_cache_dir)
+			print('Data directory: ' + dirs.user_data_dir)
+			print('Cache directory: ' + dirs.user_cache_dir)
+
+			plugin_dirs = []
+			plugin_dirs.append(os.path.join(self.exec_dir, 'plugins'))
+			plugin_dirs.append(os.path.join(dirs.user_data_dir, 'plugins'))
+			print('Plugin directories:')
+			for d in plugin_dirs:
+				print('  ' + d)
+			print('')
+
+			print('Initializing configuration...')
+			conf_file_path = os.path.join(dirs.user_data_dir, 'fbnotify.conf')
+			print('Configuration file: ' + conf_file_path)
+			self.conf = Config(conf_file_path)
+			print('')
+
+			print('Initializing feed...')
+			self.feed = Feed(self.conf.feed.url)
+			print('')
+
+			print('Initializing plugins...')
+			self.plugin_man = PluginManager(plugin_dirs)
+			self.plugin_man.load_all()
+			print('')
+
+			print('Initializing icons...')
+			self.init_icons()
+			print('')
+		except Exception as e:
+			print('')
+			print traceback.format_exc()
+			print('FATAL! Exiting..')
+			print('')
+			quit()
 
 
 	def start(self):
@@ -89,11 +115,6 @@ class Notifier:
 	def notify(self, title, body, timeout=10):
 		''' shows a notification '''
 
-		# Set icon
-		xdg_icon = 'facebook'
-		icon_path = None
-		icon_data = open(icon_path, 'rb').read() if icon_path else None
-
 		# This will send a message to any plugin
 		# listening to the 'notify' channel
 		self.plugin_man.resource.send(
@@ -101,9 +122,9 @@ class Notifier:
 			title = title,
 			body = body,
 			timeout = timeout,
-			xdg_icon = xdg_icon,
-			icon_path = icon_path,
-			icon_data = icon_data,
+			xdg_icon = self.xdg_icon,
+			icon_path = self.icon_path,
+			icon_data = self.icon_data,
 		)
 
 
@@ -146,6 +167,11 @@ class Notifier:
 
 		return dirs
 
+	def init_icons(self):
+		# Set icon
+		self.xdg_icon = 'facebook'
+		self.icon_path = None
+		self.icon_data = open(self.icon_path, 'rb').read() if self.icon_path else None
 
 	def format_time(self, then):
 		''' Formats relative time to the specified time '''

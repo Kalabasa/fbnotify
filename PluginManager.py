@@ -21,7 +21,6 @@ class PluginManager:
 	_active = []
 
 	def __init__(self, dirs=None):
-		self.dirs.append(os.path.join(os.getcwd(), 'plugins'))
 		if dirs:
 			self.dirs.extend(dirs)
 
@@ -85,6 +84,9 @@ class PluginManager:
 		plugin_matcher = re.compile(r'^(.*_?plugin)\.pyc?$', re.IGNORECASE)
 
 		for directory in self.dirs:
+			if not os.path.isdir(directory):
+				continue
+
 			lst = os.listdir(directory)
 			for entry in lst:
 				location = os.path.join(directory, entry)

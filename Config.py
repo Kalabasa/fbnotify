@@ -38,11 +38,7 @@ class Config:
 
 		# Read config file
 		cp = ConfigParser.ConfigParser()
-		try:
-			cp.read(self._file_path)
-		except ConfigParser.Error:
-			print('ERROR: Unable to read config file ' + self._file_path)
-			quit()
+		cp.read(self._file_path)
 
 		# Constraints
 		check_interval_min = 30
@@ -53,9 +49,9 @@ class Config:
 
 		try:
 			self.feed.url = cp.get(self._feed_section, 'url')
-		except ConfigParser.Error:
+		except ConfigParser.Error as e:
 			print('FATAL: In {0} [{1}], no url found!'.format(self._file_path, self._feed_section))
-			quit()
+			raise e
 
 		try:
 			self.feed.check_interval = cp.getint(self._feed_section, 'check_interval')
