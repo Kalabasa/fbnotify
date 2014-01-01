@@ -95,9 +95,9 @@ class Notifier:
 		icon_data = open(icon_path, 'rb').read() if icon_path else None
 
 		# This will send a message to any plugin
-		# listening to the 'notification' channel
+		# listening to the 'notify' channel
 		self.plugin_man.resource.send(
-			'notification',
+			'notify',
 			title = title,
 			body = body,
 			timeout = timeout,

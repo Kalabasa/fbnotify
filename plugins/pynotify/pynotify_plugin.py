@@ -12,9 +12,9 @@ class Plugin(PluginBase):
 		# Initialize pynotify
 		pynotify.init('fbnotify')
 
-		# Register to the 'notification' channel
+		# Register to the 'notify' channel
 		# to get messages about notifications
-		handle = self._resource.register_listener(self, 'notification')
+		handle = self._resource.register_listener(self, 'notify')
 
 		# Main loop
 		self._running = True
@@ -33,7 +33,7 @@ class Plugin(PluginBase):
 		return []
 
 	def plugin_receive(self, channel, **msg):
-		# Receiving a message from the 'notification' channel
+		# Receiving a message from the 'notify' channel
 
 		# Show notification
 		n = pynotify.Notification(msg['title'], msg['body'], msg['xdg_icon'])
