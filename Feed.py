@@ -14,31 +14,31 @@ logger = logging.getLogger(__name__)
 class Feed:
 	''' the notifications feed '''
 
-	feed_url = ''
-	link = ''
+	feed_url = None
+	link = None
+	_last_mod_path = None
 
 	def __init__(self, feed_url):
 		self.feed_url = feed_url
 		self.link = ''
+		self._last_mod_path = os.path.abspath('.last-modified')
 
 
 	def get_new_items(self):
 		''' returns new items from the feed '''
 
-		last_mod_path = os.path.abspath('.last-modified')
-
 		# Get the modification time of the feed for the last time I checked
 		last_mod_str = None
 		last_mod = 0
 		try:
-			last_mod_str = open(last_mod_path, 'r').readline()
+			last_mod_str = open(self._last_mod_path, 'r').readline()
 			last_mod = email.utils.mktime_tz(email.utils.parsedate_tz(last_mod_str))
 		except IOError:
-			logger.warning('Unable to open ' + last_mod_path)
+			logger.warning('Unable to read ' + self._last_mod_path)
 			logger.info('A new file is created')
 			last_mod = 0#time.mktime(time.localtime())
 			last_mod_str = email.utils.formatdate(last_mod)
-			open(last_mod_path, 'w').write(last_mod_str)
+			open(self._last_mod_path, 'w').write(last_mod_str)
 			
 
 		# Read feed from URL
@@ -63,7 +63,7 @@ class Feed:
 		if is_modified:
 			# Save the modification time of the feed
 			modified_str = feed.headers.get('Last-Modified')
-			open(last_mod_path, 'w').write(modified_str)
+			open(self._last_mod_path, 'w').write(modified_str)
 
 			# Read and parse the feed
 			xml = feed.read()

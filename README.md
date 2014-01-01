@@ -10,9 +10,10 @@ Usage
 
 Use at your own risk. This is a work-in-progress.
 
-`./main.py`
+`./main.py` or `python main.py`
 
 Libraries
 =========
 
-* Uses ActiveState/appdirs to get configuration directory
+* https://github.com/ActiveState/appdirs to get configuration directory
+* https://github.com/borntyping/python-colorlog for colorful logging

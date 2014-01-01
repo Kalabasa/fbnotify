@@ -24,8 +24,7 @@ class Notifier:
 
 	def __init__(self):
 		try:
-			os.umask(0644)
-
+			print 123
 			logger.info('Initializing directories...')
 			logger.info('Working directory: ' + os.getcwd())
 
@@ -56,7 +55,7 @@ class Notifier:
 			self.init_icons()
 		except Exception as e:
 			logger.error(traceback.format_exc())
-			logger.info('Exit')
+			logger.info('Bad exit')
 			quit()
 
 
@@ -74,7 +73,10 @@ class Notifier:
 		except KeyboardInterrupt:
 			self.plugin_man.unload_all()
 			logger.info('Stopped')
-			pass
+		except Exception as e:
+			logger.error(traceback.format_exc())
+			logger.info('Bad exit')
+			quit()
 
 
 	def notify_items(self, items):

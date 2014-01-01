@@ -1,8 +1,27 @@
 #!/usr/bin/env python
 
 from Notifier import Notifier
+
+import colorlog
+
 import logging
 
 if __name__ == '__main__':
-	logging.basicConfig(format='[%(name)s] %(levelname)s: %(message)s', level=logging.DEBUG)
+	# Setup logger
+	sh = logging.StreamHandler()
+	formatter = colorlog.ColoredFormatter(
+		"%(log_color)s[%(name)s] %(levelname)s: %(message)s%(reset)s",
+		datefmt=None,
+		reset=True,
+		log_colors={
+			'DEBUG':    'cyan',
+			'WARNING':  'yellow',
+			'ERROR':    'red',
+			'CRITICAL': 'bold_red',
+		}
+	)
+	sh.setFormatter(formatter)
+	logging.getLogger('').addHandler(sh)
+
+	# Start!
 	Notifier().start()
