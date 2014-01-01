@@ -10,6 +10,10 @@ import traceback
 import time
 import os
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class Notifier:
 	''' main class '''
 
@@ -22,64 +26,54 @@ class Notifier:
 		try:
 			os.umask(0644)
 
-			print('Initializing directories...')
-			print('Working directory: ' + os.getcwd())
+			logger.info('Initializing directories...')
+			logger.info('Working directory: ' + os.getcwd())
 
 			dirs = self.init_dirs()
 			os.chdir(dirs.user_cache_dir)
-			print('Data directory: ' + dirs.user_data_dir)
-			print('Cache directory: ' + dirs.user_cache_dir)
+			logger.info('Data directory: ' + dirs.user_data_dir)
+			logger.info('Cache directory: ' + dirs.user_cache_dir)
 
 			plugin_dirs = []
 			plugin_dirs.append(os.path.join(self.exec_dir, 'plugins'))
 			plugin_dirs.append(os.path.join(dirs.user_data_dir, 'plugins'))
-			print('Plugin directories:')
 			for d in plugin_dirs:
-				print('  ' + d)
-			print('')
+				logger.info('Plugin directory:' + d)
 
-			print('Initializing configuration...')
+			logger.info('Initializing configuration...')
 			conf_file_path = os.path.join(dirs.user_data_dir, 'fbnotify.conf')
-			print('Configuration file: ' + conf_file_path)
+			logger.info('Configuration file: ' + conf_file_path)
 			self.conf = Config(conf_file_path)
-			print('')
 
-			print('Initializing feed...')
+			logger.info('Initializing feed...')
 			self.feed = Feed(self.conf.feed.url)
-			print('')
 
-			print('Initializing plugins...')
+			logger.info('Initializing plugins...')
 			self.plugin_man = PluginManager(plugin_dirs)
 			self.plugin_man.load_all()
-			print('')
 
-			print('Initializing icons...')
+			logger.info('Initializing icons...')
 			self.init_icons()
-			print('')
 		except Exception as e:
-			print('')
-			print traceback.format_exc()
-			print('FATAL! Exiting..')
-			print('')
+			logger.error(traceback.format_exc())
+			logger.info('Exit')
 			quit()
 
 
 	def start(self):
 		try:
 			while True:
-				print('Checking for new notifications...')
+				logger.info('Checking for new notifications...')
 
 				new_items = self.feed.get_new_items()
 				self.notify_items(new_items)
 				self.adjust_interval(len(new_items))
 
 				time.sleep(self.conf.feed.check_interval)
-				print('')
+				logger.info('')
 		except KeyboardInterrupt:
 			self.plugin_man.unload_all()
-			print('')
-			print('Stopped')
-			print('')
+			logger.info('Stopped')
 			pass
 
 
@@ -88,7 +82,7 @@ class Notifier:
 
 		n = len(items)
 		n_new_notifications = '{0} new notification{1}'.format(n, '' if n == 1 else 's')
-		print(n_new_notifications)
+		logger.info(n_new_notifications)
 		if n == 0:
 			return
 
@@ -146,14 +140,14 @@ class Notifier:
 					ci = ci * 1/5
 					if ci < min_interval:
 						ci = min_interval
-					print('Decreased check interval to {0}s'.format(ci))
+					logger.info('Decreased check interval to {0}s'.format(ci))
 			else:
 				max_interval = 60 * 20
 				if ci < max_interval:
 					ci = ci * 9/5
 					if ci > max_interval:
 						ci = max_interval
-					print('Increased check interval to {0}s'.format(ci))
+					logger.info('Increased check interval to {0}s'.format(ci))
 			self.conf.feed.check_interval = ci
 
 
@@ -165,11 +159,11 @@ class Notifier:
 		cache_dir = dirs.user_cache_dir
 
 		if not os.path.isdir(conf_dir):
-			print('Created configuration directory ' + conf_dir)
+			logger.info('Created configuration directory ' + conf_dir)
 			os.makedirs(conf_dir)
 
 		if not os.path.isdir(cache_dir):
-			print('Created cache directory ' + cache_dir)
+			logger.info('Created cache directory ' + cache_dir)
 			os.makedirs(cache_dir)
 
 		return dirs

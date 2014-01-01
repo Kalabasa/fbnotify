@@ -1,6 +1,10 @@
 import ConfigParser
 import os
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class FeedConfig:
 	def __init__(self):
 		# Defaults
@@ -32,7 +36,7 @@ class Config:
 
 		# Create config file
 		if not os.path.exists(self._file_path):
-			print('Created new config file with default values')
+			logger.info('Created new config file with default values')
 			self.save()
 			os.chmod(self.file_path, 0600)
 
@@ -50,63 +54,63 @@ class Config:
 		try:
 			self.feed.url = cp.get(self._feed_section, 'url')
 		except ConfigParser.Error as e:
-			print('FATAL: In {0} [{1}], no url found!'.format(self._file_path, self._feed_section))
+			logger.error('FATAL: In {0} [{1}], no url found!'.format(self._file_path, self._feed_section))
 			raise e
 
 		try:
 			self.feed.check_interval = cp.getint(self._feed_section, 'check_interval')
 		except ConfigParser.Error:
-			print('In {0} [{1}], no check_interval found!'.format(self._file_path, self._feed_section))
-			print('Using default {0} seconds per check'.format(self.feed.check_interval))
+			logger.info('In {0} [{1}], no check_interval found!'.format(self._file_path, self._feed_section))
+			logger.info('Using default {0} seconds per check'.format(self.feed.check_interval))
 			changed = True;
 		if self.feed.check_interval < check_interval_min:
-			print('WARNING: [{1}] check_interval ({0}) too low'.format(self.feed.check_interval, self._feed_section))
+			logger.info('[{1}] check_interval ({0}) too low'.format(self.feed.check_interval, self._feed_section))
 			self.feed.check_interval = check_interval_min
-			print('Setting interval to minimum {0}'.format(self.feed.check_interval))
+			logger.info('Setting interval to minimum {0}'.format(self.feed.check_interval))
 			changed = True;
 
 		try:
 			self.feed.dynamic_interval = cp.getboolean(self._feed_section, 'dynamic_interval')
 		except ConfigParser.Error:
-			print('In {0} [{1}], no dynamic_interval found!'.format(self._file_path, self._feed_section))
-			print('Using default {0}'.format(self.feed.dynamic_interval))
+			logger.info('In {0} [{1}], no dynamic_interval found!'.format(self._file_path, self._feed_section))
+			logger.info('Using default {0}'.format(self.feed.dynamic_interval))
 			changed = True;
 
 		try:
 			self.notification.show_content = cp.getboolean(self._notif_section, 'show_content')
 		except ConfigParser.Error:
-			print('In {0} [{1}], no show_content found!'.format(self._file_path, self._notif_section))
-			print('Using default {0}'.format(self.notification.show_content))
+			logger.info('In {0} [{1}], no show_content found!'.format(self._file_path, self._notif_section))
+			logger.info('Using default {0}'.format(self.notification.show_content))
 			changed = True;
 
 		try:
 			self.notification.item_interval = cp.getint(self._notif_section, 'item_interval')
 		except ConfigParser.Error:
-			print('In {0} [{1}], no item_interval found!'.format(self._file_path, self._notif_section))
-			print('Using default {0} seconds per item'.format(self.notification.item_interval))
+			logger.info('In {0} [{1}], no item_interval found!'.format(self._file_path, self._notif_section))
+			logger.info('Using default {0} seconds per item'.format(self.notification.item_interval))
 			changed = True;
 		if self.notification.item_interval < item_interval_min:
-			print('WARNING: [{1}] item_interval ({0}) too low'.format(self.notification.item_interval, self._notif_section))
+			logger.info('[{1}] item_interval ({0}) too low'.format(self.notification.item_interval, self._notif_section))
 			self.notification.item_interval = item_interval_min
-			print('Setting item_interval to minimum {0}'.format(self.notification.item_interval))
+			logger.info('Setting item_interval to minimum {0}'.format(self.notification.item_interval))
 			changed = True;
 
 		try:
 			self.notification.itemize = cp.getint(self._notif_section, 'itemize')
 		except ConfigParser.Error:
-			print('In {0} [{1}], no itemize found!'.format(self._file_path, self._notif_section))
-			print('Using default {0}'.format(self.notification.itemize))
+			logger.info('In {0} [{1}], no itemize found!'.format(self._file_path, self._notif_section))
+			logger.info('Using default {0}'.format(self.notification.itemize))
 			changed = True;
 		if self.notification.itemize != 0 and self.notification.itemize < itemize_min:
-			print('WARNING: [{1}] itemize ({0}) value invalid'.format(self.notification.itemize, self._notif_section))
+			logger.info('[{1}] itemize ({0}) value invalid'.format(self.notification.itemize, self._notif_section))
 			self.notification.itemize = itemize_min
 			changed = True;
-			print('Setting itemize to {0}'.format(self.notification.item_interval))
+			logger.info('Setting itemize to {0}'.format(self.notification.item_interval))
 		if self.notification.itemize > 0 and not self.notification.show_content:
-			print('WARNING: itemize but not ShowContent')
-			print('No point in itemizing if content is not shown')
+			logger.info('itemize=True but show_content=False')
+			logger.info('No point in itemizing if content is not shown')
 			self.notification.show_content = True
-			print('Setting show_content to {0}'.format(self.notification.show_content))
+			logger.info('Setting show_content to {0}'.format(self.notification.show_content))
 			changed = True;
 
 		# Save changes due to constraints

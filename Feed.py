@@ -7,6 +7,10 @@ import urllib2
 import time
 import os
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class Feed:
 	''' the notifications feed '''
 
@@ -30,8 +34,8 @@ class Feed:
 			last_mod_str = open(last_mod_path, 'r').readline()
 			last_mod = email.utils.mktime_tz(email.utils.parsedate_tz(last_mod_str))
 		except IOError:
-			print('WARNING: Unable to open ' + last_mod_path)
-			print('A new file is created')
+			logger.warning('Unable to open ' + last_mod_path)
+			logger.info('A new file is created')
 			last_mod = 0#time.mktime(time.localtime())
 			last_mod_str = email.utils.formatdate(last_mod)
 			open(last_mod_path, 'w').write(last_mod_str)
@@ -51,7 +55,7 @@ class Feed:
 				raise e
 		except IOError as e:
 			# Connection error
-			print('ERROR: Unable to load feed URL')
+			logger.error('Unable to load feed URL')
 			return []
 
 		n = 0

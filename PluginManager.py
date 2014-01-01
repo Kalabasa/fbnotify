@@ -1,4 +1,4 @@
-# with some help from
+# plugin system implemented with some help from
 # http://lkubuntu.wordpress.com/2012/10/02/writing-a-python-plugin-api/
 
 from PluginContext import PluginContext
@@ -8,6 +8,9 @@ import collections
 import re
 import imp
 import os
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 PluginData = collections.namedtuple('PluginData', ['name', 'file_name', 'module'])
@@ -43,20 +46,21 @@ class PluginManager:
 
 			depend = plugin.plugin_dependencies()
 			if depend:
-				print('Loading depedencies for ' + plugin_data.name + ' plugin')
+				logger.info('Loading depedencies for ' + plugin_data.name + ' plugin')
 				for p in depend:
 					if not self.load_by_name(p):
-						print('WARNING: Unable to satisfy the depedencies for ' + plugin_data.name)
-						print('Unable to load ' + plugin_data.name + ' plugin')
+						logger.warning('Unable to satisfy the depedencies for ' + plugin_data.name)
+						logger.warning('Unable to load ' + plugin_data.name + ' plugin')
 						return None
 
 			plugin._context = self.context
 			plugin.__thread = Thread(target=lambda: self._start(plugin))
 			plugin.__thread.start()
 
-			print('Loaded ' + plugin_data.name + ' plugin')
+			logger.info('Loaded ' + plugin_data.name + ' plugin')
+
 		except Exception as e:
-			print('WARNING: Unable to load ' + plugin_data.name + ' plugin')
+			logger.warning('Unable to load ' + plugin_data.name + ' plugin')
 			return None
 
 		return plugin
