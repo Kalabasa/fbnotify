@@ -21,7 +21,10 @@ if __name__ == '__main__':
 		}
 	)
 	sh.setFormatter(formatter)
-	logging.getLogger('').addHandler(sh)
+	
+	root = logging.getLogger('')
+	root.addHandler(sh)
+	root.setLevel(logging.INFO)
 
 	# Start!
 	Notifier().start()

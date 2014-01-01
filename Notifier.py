@@ -24,24 +24,23 @@ class Notifier:
 
 	def __init__(self):
 		try:
-			print 123
 			logger.info('Initializing directories...')
 			logger.info('Working directory: ' + os.getcwd())
 
 			dirs = self.init_dirs()
 			os.chdir(dirs.user_cache_dir)
-			logger.info('Data directory: ' + dirs.user_data_dir)
-			logger.info('Cache directory: ' + dirs.user_cache_dir)
+			logger.info(' Directory for data: ' + dirs.user_data_dir)
+			logger.info(' Directory for cache: ' + dirs.user_cache_dir)
 
 			plugin_dirs = []
 			plugin_dirs.append(os.path.join(self.exec_dir, 'plugins'))
 			plugin_dirs.append(os.path.join(dirs.user_data_dir, 'plugins'))
 			for d in plugin_dirs:
-				logger.info('Plugin directory:' + d)
+				logger.info(' Directory for plugins:' + d)
 
 			logger.info('Initializing configuration...')
 			conf_file_path = os.path.join(dirs.user_data_dir, 'fbnotify.conf')
-			logger.info('Configuration file: ' + conf_file_path)
+			logger.info(' Configuration file: ' + conf_file_path)
 			self.conf = Config(conf_file_path)
 
 			logger.info('Initializing feed...')
