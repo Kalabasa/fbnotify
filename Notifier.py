@@ -87,14 +87,22 @@ class Notifier:
 		''' shows notifications about items '''
 
 		n = len(items)
+		n_new_notifications = '{0} new notification{1}'.format(n, '' if n == 1 else 's')
+		print(n_new_notifications)
+		if n == 0:
+			return
 
-		print('{0} notification{1}'.format(n, '' if n == 1 else 's'))
+		# Update item list
+		self.plugin_man.resource.send(
+			'list',
+			items = items
+		)
 
 		if n > 1: # Many notifications
 
 			# Declare multiple notifications
 			dt = items[n-1].dt # Earliest
-			self.notify('{0} new notifications'.format(n), self.format_time(dt))
+			self.notify(n_new_notifications, self.format_time(dt))
 
 			# Enumerate notifications if enabled
 			interval = self.conf.notification.item_interval
@@ -109,8 +117,7 @@ class Notifier:
 			if conf.show_content:
 				self.notify(item.text, self.format_time(item.dt))
 			else:
-				self.notify('1 new notification', self.format_time(item.dt))
-
+				self.notify(n_new_notifications, self.format_time(item.dt))
 
 	def notify(self, title, body, timeout=10):
 		''' shows a notification '''
@@ -172,6 +179,7 @@ class Notifier:
 		self.xdg_icon = 'facebook'
 		self.icon_path = None
 		self.icon_data = open(self.icon_path, 'rb').read() if self.icon_path else None
+
 
 	def format_time(self, then):
 		''' Formats relative time to the specified time '''
