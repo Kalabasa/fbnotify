@@ -1,17 +1,23 @@
 from PluginBase import PluginBase
 
-import pynotify
+import gntp.notifier
 
 import time
 
 class Plugin(PluginBase):
-	''' Plugin for notifications using pynotify '''
+	''' Plugin for notifications using Growl '''
 
 	_running = False
+	_growl = None
 
 	def plugin_init(self):
-		# Initialize pynotify
-		pynotify.init('fbnotify')
+		# Register to Growl
+		self._growl = gntp.notifier.GrowlNotifier(
+			applicationName = 'fbnotify',
+			notifications = ['Notification'],
+			defaultNotifications = ['Notification']
+		)
+		self._growl.register()
 
 		# Register to the 'notify' channel
 		# to get messages about notifications
@@ -37,7 +43,11 @@ class Plugin(PluginBase):
 		# Receiving a message from the 'notify' channel
 
 		# Show notification
-		n = pynotify.Notification(msg['title'], msg['body'], msg['xdg_icon'])
-		if 'timeout' in msg:
-			n.set_timeout(msg['timeout'])
-		n.show()
+		self._growl.notify(
+			noteType = 'Notification',
+			title = msg['title'],
+			description = msg['body'],
+			icon = msg['icon_data'],
+			sticky = False,
+			priority = 1,
+		)

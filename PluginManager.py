@@ -36,17 +36,28 @@ class PluginManager:
 	def load(self, plugin_data):
 		''' loads a plugin '''
 
-		module = imp.load_module(plugin_data.file_name, *plugin_data.module)
-		plugin = module.Plugin()
-		self._active.append(plugin)
+		try:
+			module = imp.load_module(plugin_data.file_name, *plugin_data.module)
+			plugin = module.Plugin()
+			self._active.append(plugin)
 
-		depend = plugin.plugin_dependencies()
+			depend = plugin.plugin_dependencies()
+			if depend:
+				print('Loading depedencies for ' + plugin_data.name + ' plugin')
+				for p in depend:
+					if not self.load_by_name(p):
+						print('WARNING: Unable to satisfy the depedencies for ' + plugin_data.name)
+						print('Unable to load ' + plugin_data.name + ' plugin')
+						return None
 
-		plugin._context = self.context
-		plugin.__thread = Thread(target=lambda: self._start(plugin))
-		plugin.__thread.start()
+			plugin._context = self.context
+			plugin.__thread = Thread(target=lambda: self._start(plugin))
+			plugin.__thread.start()
 
-		print('Loaded ' + plugin_data.name + ' plugin')
+			print('Loaded ' + plugin_data.name + ' plugin')
+		except Exception as e:
+			print('WARNING: Unable to load ' + plugin_data.name + ' plugin')
+			return None
 
 		return plugin
 
@@ -54,7 +65,8 @@ class PluginManager:
 		''' loads a plugin '''
 		for p in self.get_plugins():
 			if p.name == name:
-				self.load(p)
+				return self.load(p)
+		return None
 
 	def load_all(self):
 		''' loads all plugins '''

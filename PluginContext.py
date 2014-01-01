@@ -3,7 +3,7 @@ import collections
 
 PluginChannel = collections.namedtuple('PluginChannel', ['plugin', 'channel', 'queue'])
 
-class PluginResource:
+class PluginContext:
 	'''
 	plugin messaging system
 	this is where plugin interacts
