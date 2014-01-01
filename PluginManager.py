@@ -1,7 +1,7 @@
 # with some help from
 # http://lkubuntu.wordpress.com/2012/10/02/writing-a-python-plugin-api/
 
-from PluginResource import PluginResource
+from PluginContext import PluginContext
 
 from threading import Thread
 import collections
@@ -16,7 +16,7 @@ class PluginManager:
 	''' manages plugins '''
 
 	dirs = []
-	resource = None
+	context = None
 	_plugins = []
 	_active = []
 
@@ -24,7 +24,7 @@ class PluginManager:
 		if dirs:
 			self.dirs.extend(dirs)
 
-		self.resource = PluginResource()
+		self.context = PluginContext()
 
 
 	def get_plugins(self):
@@ -42,7 +42,7 @@ class PluginManager:
 
 		depend = plugin.plugin_dependencies()
 
-		plugin._resource = self.resource
+		plugin._context = self.context
 		plugin.__thread = Thread(target=lambda: self._start(plugin))
 		plugin.__thread.start()
 
@@ -69,7 +69,7 @@ class PluginManager:
 
 		plugin.plugin_destroy()
 		plugin.__thread.join()
-		plugin._resource = None
+		plugin._context = None
 
 	def unload_all(self):
 		''' unloads all plugins '''

@@ -93,7 +93,7 @@ class Notifier:
 			return
 
 		# Update item list
-		self.plugin_man.resource.send(
+		self.plugin_man.context.send(
 			'list',
 			items = items
 		)
@@ -124,7 +124,7 @@ class Notifier:
 
 		# This will send a message to any plugin
 		# listening to the 'notify' channel
-		self.plugin_man.resource.send(
+		self.plugin_man.context.send(
 			'notify',
 			title = title,
 			body = body,

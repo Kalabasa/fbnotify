@@ -1,7 +1,7 @@
 class PluginBase:
 	''' base class for plugins '''
 
-	_resource = None
+	_context = None
 	__thread = None
 
 	def plugin_init(self):

@@ -4,7 +4,7 @@ import pynotify
 import time
 
 class Plugin(PluginBase):
-	''' Plugin for notifications frontend using pynotify '''
+	''' Plugin for notifications using pynotify '''
 
 	_running = False
 
@@ -14,17 +14,17 @@ class Plugin(PluginBase):
 
 		# Register to the 'notify' channel
 		# to get messages about notifications
-		handle = self._resource.register_listener(self, 'notify')
+		handle = self._context.register_listener(self, 'notify')
 
 		# Main loop
 		self._running = True
-		while self._resource and self._running:
+		while self._context and self._running:
 			# Call PluginResource.receive to get messages from the channel
-			self._resource.receive(handle)
+			self._context.receive(handle)
 			time.sleep(1)
 
 	def plugin_destroy(self):
-		# Stop the loop
+		# Stop the main loop
 		self._running = False
 		pass
 
