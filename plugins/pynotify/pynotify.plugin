@@ -1,0 +1,5 @@
+[plugin]
+module = pynotify_plugin
+dependencies =
+channels = notify
+roles = notify:100

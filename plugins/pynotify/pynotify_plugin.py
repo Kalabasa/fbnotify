@@ -13,15 +13,11 @@ class Plugin(PluginBase):
 		# Initialize pynotify
 		pynotify.init('fbnotify')
 
-		# Register to the 'notify' channel
-		# to get messages about notifications
-		handle = self._context.register_listener(self, 'notify')
-
 		# Main loop
 		self._running = True
-		while self._context and self._running:
-			# Call PluginResource.receive to get messages from the channel
-			self._context.receive(handle)
+		while self.context and self._running:
+			# Call PluginContext.receive to get messages
+			self.context.receive()
 			time.sleep(1)
 
 	def plugin_destroy(self):
@@ -29,15 +25,11 @@ class Plugin(PluginBase):
 		self._running = False
 		pass
 
-	def plugin_dependencies(self):
-		# No dependencies
-		return []
-
-	def plugin_receive(self, channel, **msg):
+	def plugin_receive(self, channel, message):
 		# Receiving a message from the 'notify' channel
 
 		# Show notification
-		n = pynotify.Notification(msg['title'], msg['body'], msg['xdg_icon'])
-		if 'timeout' in msg:
-			n.set_timeout(msg['timeout'])
+		n = pynotify.Notification(message['title'], message['body'], message['xdg_icon'])
+		if 'timeout' in message:
+			n.set_timeout(message['timeout'])
 		n.show()

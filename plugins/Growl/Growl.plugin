@@ -1,0 +1,5 @@
+[plugin]
+module = Growl_plugin
+dependencies =
+channels = notify
+roles = notify:90

@@ -3,7 +3,10 @@ fbnotify
 
 Work-in-progess. Still incomplete!
 
-Facebook desktop notifier.
+Cross-platform Facebook desktop notifier using Python.
+
+The backend part is mostly complete.
+The fronted part is incomplete.
 
 Usage
 =====
@@ -11,6 +14,11 @@ Usage
 Use at your own risk. This is a work-in-progress.
 
 `./main.py` or `python main.py`
+
+Plugins
+=======
+
+There is a plugin system to aid in making it cross-platform.
 
 Libraries
 =========

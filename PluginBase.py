@@ -1,28 +1,25 @@
 class PluginBase:
 	''' base class for plugins '''
 
-	_context = None
-	__thread = None
+	context = None
 
 	def plugin_init(self):
 		'''
-		initialize anything here
-		this method can run until plugin_destroy is called
-		when plugin_destroy is called, this method must terminate 
+		initialize anything that is needed
+
+		This method can run only until plugin_destroy is called. When 
+		plugin_destroy is called, this method must terminate.
 		'''
 		raise NotImplementedError()
 
 	def plugin_destroy(self):
-		''' cleanup everything here '''
-		raise NotImplementedError()
-
-	def plugin_dependencies(self):
 		'''
-		must return a list of plugin names that must be initialized
-		before initializing this plugin
+		cleanup everything that needs to be cleaned up before shutting down
 		'''
 		raise NotImplementedError()
 
-	def plugin_receive(self, channel, **msg):
-		''' called to receive a message from the plugin messaging system '''
-		pass
+	def plugin_receive(self, channel, message):
+		'''
+		called when receiving a message from the plugin messaging system
+		'''
+		raise NotImplementedError()
