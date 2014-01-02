@@ -38,7 +38,7 @@ class Config:
 		if not os.path.exists(self._file_path):
 			logger.info('Created new config file with default values')
 			self.save()
-			os.chmod(self.file_path, 0600)
+			os.chmod(self._file_path, 0600)
 
 		# Read config file
 		cp = ConfigParser.ConfigParser()

@@ -171,7 +171,7 @@ class PluginManager:
 				cp = ConfigParser.ConfigParser()
 				cp.read(plugin_file_path)
 
-				module = cp.get('plugin', 'module')
+				module = cp.get('plugin', 'module').strip()
 				dependencies = [x.strip() for x in cp.get('plugin', 'dependencies').strip().split(',') if x]
 				channels = [x.strip() for x in cp.get('plugin', 'channels').strip().split(',') if x]
 				roles = {}
@@ -181,7 +181,10 @@ class PluginManager:
 					role,priority = r.strip().split(':')
 					roles[role.strip()] = int(priority)
 
-				info = imp.find_module(module, [location])
+				try:
+					info = imp.find_module(module, [location])
+				except ImportError:
+					continue
 
 				plugin_data = PluginData(name, module, dependencies, channels, roles, info)
 				self._plugins.append(plugin_data)
