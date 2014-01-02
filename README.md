@@ -3,14 +3,14 @@ Facebook Notifier
 
 *fbnotify* ~~is~~ will be a cross-platform Facebook notifier using Python. 
 
-This is still incomplete and in-development!
+This is still in-development!
 
-It runs in the background and notifies you whenever you get a notification in Facebook. No need to open the browser. Notifications come to you instead of you coming for them.
+It runs in the background and notifies you whenever you get a notification in Facebook. Notifications come to you instead of you coming for them.
 
 Installation
 ------------
 
-Copy everything to anywhere.
+Use at your own risk. Copy everything to anywhere.
 
 Usage
 -----
@@ -27,10 +27,13 @@ There is a plugin system to aid in making it cross-platform.
 Libraries
 =========
 
-Libraries are included.
+Libraries included are listed here. Files are listed as well.
 
 * https://github.com/ActiveState/appdirs to get configuration directory
+	* appdirs.py
+	* appdirs.pyc
 * https://github.com/borntyping/python-colorlog for colorful logging
+	* colorlog/*
 
 License
 =======
