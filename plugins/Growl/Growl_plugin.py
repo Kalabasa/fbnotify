@@ -14,8 +14,8 @@ class Plugin(PluginBase):
 		# Register to Growl
 		self._growl = gntp.notifier.GrowlNotifier(
 			applicationName = 'fbnotify',
-			notifications = ['Notification'],
-			defaultNotifications = ['Notification']
+			notifications = ['Errors', 'Notifications'],
+			defaultNotifications = ['Errors', 'Notifications']
 		)
 		self._growl.register()
 
@@ -36,10 +36,11 @@ class Plugin(PluginBase):
 
 		# Show notification
 		self._growl.notify(
-			noteType = 'Notification',
+			noteType = 'Notifications',
 			title = message['title'],
 			description = message['body'],
 			icon = message['icon_data'],
+			callback = message['link'],
 			sticky = False,
 			priority = 1,
 		)
