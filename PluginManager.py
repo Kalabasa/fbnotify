@@ -76,7 +76,7 @@ class PluginManager:
 
 			logger.info('Loaded plugin: ' + plugin_data.name)
 
-		except ImportError as e:
+		except Exception as e:
 			logger.warning('Unable to load plugin: ' + plugin_data.name)
 			logger.warning(str(e))
 			return None

@@ -1,4 +1,9 @@
-class PluginBase:
+from PluginBase import PluginBase
+
+import gtk
+import gobject
+
+class Plugin(PluginBase):
 	''' base class for plugins '''
 
 	context = None
