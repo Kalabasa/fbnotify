@@ -17,7 +17,7 @@ Usage
 
 Use at your own risk. This is a work-in-progress.
 
-To run, execute `main.py` (`./main.py` or `python main.py`).
+To run, execute `fbnotify.py` (`./fbnotify.py` or `python fbnotify.py`).
 
 To stop, use an interrupt signal (`^C` on *nix)
 
@@ -32,7 +32,7 @@ There is a plugin system to aid in making it cross-platform.
 
 * PyGTK
 
-	Plugin for displaying the status icon in the notification area
+	**UNFINISHED** Plugin for displaying the status icon in the notification area
 
 * Growl
 	

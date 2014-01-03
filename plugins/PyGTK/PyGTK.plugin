@@ -1,5 +1,4 @@
 [plugin]
-module = 
+module = PyGTK_plugin
 dependencies =
-channels = 
-roles = 
+channels = indicate:180,list:180

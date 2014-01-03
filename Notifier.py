@@ -25,12 +25,12 @@ class Notifier:
 	def __init__(self):
 		try:
 			logger.info('Initializing directories...')
-			logger.info('* Work: ' + os.getcwd())
+			logger.debug('* Work: ' + os.getcwd())
 
 			dirs = self.init_dirs()
 			os.chdir(dirs.user_cache_dir)
+			logger.debug('* Cache: ' + dirs.user_cache_dir)
 			logger.info('* Data: ' + dirs.user_data_dir)
-			logger.info('* Cache: ' + dirs.user_cache_dir)
 
 			plugin_dirs = []
 			plugin_dirs.append(os.path.join(self.exec_dir, 'plugins'))
@@ -52,6 +52,8 @@ class Notifier:
 			logger.info('Initializing plugins...')
 			self.plugin_man = PluginManager(plugin_dirs)
 			self.plugin_man.load_by_role('notify')
+			self.plugin_man.load_by_role('indicate')
+			self.plugin_man.load_by_role('list')
 			print('')
 
 			logger.info('Initializing icons...')

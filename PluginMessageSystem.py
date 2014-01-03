@@ -3,6 +3,9 @@ from PluginContext import PluginContext
 from Queue import Queue
 import collections
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 PluginQueue = collections.namedtuple('PluginQueue', ['plugin', 'queue'])
 PluginMessage = collections.namedtuple('PluginMessage', ['channel', 'message'])

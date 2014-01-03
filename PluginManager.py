@@ -21,7 +21,6 @@ PluginData = collections.namedtuple('PluginData', [
 		'module',
 		'dependencies',
 		'channels',
-		'roles',
 		'info'
 	])
 
@@ -31,7 +30,7 @@ class PluginManager:
 	dirs = []
 	messaging = None
 	_plugins = []
-	_active = []
+	_active = {}
 
 	def __init__(self, dirs=None):
 		if dirs:
@@ -50,14 +49,20 @@ class PluginManager:
 	def load(self, plugin_data):
 		''' loads a plugin '''
 
+		logger.debug('Attempting to load plugin: ' + plugin_data.name)
+
+		if plugin_data.name in self._active:
+			logger.warning('Plugin ' + plugin_data.name + ' is already loaded!')
+			return self._active[plugin_data.name]
+
 		try:
 			module = imp.load_module(plugin_data.module, *plugin_data.info)
 
 			depend = plugin_data.dependencies
 			if depend:
-				logger.info('Loading dependencies for plugin: ' + plugin_data.name)
+				logger.debug('Loading dependencies for plugin: ' + plugin_data.name)
 				for p in depend:
-					logger.info('Depends on ' + p)
+					logger.debug('Depends on ' + p)
 					if not self.load_by_name(p):
 						logger.warning('Unable to satisfy the dependencies for ' + plugin_data.name)
 						logger.warning('Unable to load plugin: ' + plugin_data.name)
@@ -72,7 +77,7 @@ class PluginManager:
 			plugin.__thread.daemon = True
 			plugin.__thread.start()
 
-			self._active.append(plugin)
+			self._active[plugin_data.name] = plugin
 
 			logger.info('Loaded plugin: ' + plugin_data.name)
 
@@ -83,12 +88,17 @@ class PluginManager:
 
 		return plugin
 
-	def unload(self, plugin):
+	def unload(self, name):
 		''' unloads a plugin '''
 
-		logger.info('Unloading plugin module: ' + os.path.basename(inspect.getfile(plugin.__class__)))
+		logger.debug('Attempting to unload plugin: ' + name)
 
-		self._active.remove(plugin)
+		if not name in self._active:
+			logger.error('Plugin ' + name + ' nonexistent or inactive!')
+			return
+
+		plugin = self._active[name]
+		del self._active[name]
 
 		self.messaging.unregister_plugin(plugin)
 
@@ -103,20 +113,29 @@ class PluginManager:
 	def load_by_role(self, role):
 		''' loads a plugin '''
 
+		logger.debug('Loading plugin for role: ' + role)
+
+		# Get plugins that satisfy this role
 		candidate_plugins = []
 		for p in self.get_plugins():
-			if role in p.roles:
+			if role in p.channels:
 				candidate_plugins.append(p)
 
 		if not candidate_plugins:
 			return None
 
-		highest = candidate_plugins[0]
-		for p in candidate_plugins:
-			if p.roles[role] > highest.roles[role]:
-				highest = p
+		# Sort by descending priority
+		candidate_plugins.sort(key=lambda p: p.channels[role], reverse=True)
 
-		return self.load(highest)
+		# Try to load all starting from the highest
+		for p in candidate_plugins:
+			loaded = self.load(p)
+			if loaded:
+				return loaded
+
+		logger.error('No plugin loaded for role: ' + role)
+
+		return None
 
 
 	def load_by_name(self, name):
@@ -125,6 +144,9 @@ class PluginManager:
 		for p in self.get_plugins():
 			if p.name == name:
 				return self.load(p)
+
+		logger.error('No plugin found with name: ' + name)
+
 		return None
 
 	def load_all(self):
@@ -136,8 +158,12 @@ class PluginManager:
 	def unload_all(self):
 		''' unloads all plugins '''
 
-		for p in self._active:
-			self.unload(p)
+		active = []
+		for n in self._active:
+			active.append(n)
+
+		for n in active:
+			self.unload(n)
 
 
 	def refresh_plugins_list(self):
@@ -173,20 +199,19 @@ class PluginManager:
 
 				module = cp.get('plugin', 'module').strip()
 				dependencies = [x.strip() for x in cp.get('plugin', 'dependencies').strip().split(',') if x]
-				channels = [x.strip() for x in cp.get('plugin', 'channels').strip().split(',') if x]
-				roles = {}
-				for r in cp.get('plugin', 'roles').strip().split(','):
-					if not r:
+				channels = {}
+				for c in cp.get('plugin', 'channels').strip().split(','):
+					if not c:
 						continue
-					role,priority = r.strip().split(':')
-					roles[role.strip()] = int(priority)
+					channel,priority = c.strip().split(':')
+					channels[channel.strip()] = int(priority)
 
 				try:
 					info = imp.find_module(module, [location])
 				except ImportError:
 					continue
 
-				plugin_data = PluginData(name, module, dependencies, channels, roles, info)
+				plugin_data = PluginData(name, module, dependencies, channels, info)
 				self._plugins.append(plugin_data)
 	
 

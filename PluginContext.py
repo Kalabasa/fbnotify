@@ -1,5 +1,7 @@
 import Queue
 
+import inspect # DEBUG
+
 class PluginContext:
 	'''
 	this is where plugin interacts
