@@ -94,7 +94,7 @@ class Plugin(PluginBase):
 
 		about_dialog.set_destroy_with_parent(True)
 		about_dialog.set_name('fbnotify')
-		#about_dialog.set_version("1.0")
+		about_dialog.set_version(notices.version)
 		about_dialog.set_comments(notices.description)
 		about_dialog.set_copyright(notices.copyright)
 		about_dialog.set_authors(notices.authors)
