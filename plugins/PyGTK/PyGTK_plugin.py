@@ -1,8 +1,11 @@
+import notices
 from PluginBase import PluginBase
 
 import gtk
 gtk.gdk.threads_init()
 import gobject
+
+import webbrowser
 
 class Plugin(PluginBase):
 	''' provides status icon in the notification area '''
@@ -52,10 +55,53 @@ class Plugin(PluginBase):
 	def popup_menu(self, icon, button, time):
 		menu = gtk.Menu()
 
-		for i in self.items:
-			menu_item = gtk.MenuItem(i.text)
-			menu.append(menu_item)
+		if self.items:
+			for i in self.items:
+				menu_item = gtk.MenuItem(i.text)
+				def get_callback(item):
+					def f(widget):
+						webbrowser.open(item.link)
+					return f
+				menu_item.connect('activate', get_callback(i))
+				menu.append(menu_item)
+		else:
+			msg = gtk.MenuItem('No Notifications')
+			msg.set_sensitive(False)
+			menu.append(msg)
+
+		menu.append(gtk.SeparatorMenuItem())
+
+		launch = gtk.MenuItem('Launch Facebook Website')
+		about = gtk.MenuItem('About')
+		quit = gtk.MenuItem('Quit')
+
+		launch.connect('activate', self.menu_launch)
+		about.connect('activate', self.menu_about)
+		quit.connect('activate', self.menu_quit)
+
+		menu.append(about)
+		menu.append(quit)
 
 		menu.show_all()
 
 		menu.popup(None, None, gtk.status_icon_position_menu, button, time, self.icon)
+
+	def menu_launch(self, widget):
+		webbrowser.open('www.facebook.com')
+
+	def menu_about(self, widget):
+		about_dialog = gtk.AboutDialog()
+
+		about_dialog.set_destroy_with_parent(True)
+		about_dialog.set_name('fbnotify')
+		#about_dialog.set_version("1.0")
+		about_dialog.set_comments(notices.description)
+		about_dialog.set_copyright(notices.copyright)
+		about_dialog.set_authors(notices.authors)
+		about_dialog.set_license(notices.license)
+		
+		about_dialog.run()
+		about_dialog.destroy()
+
+	def menu_quit(self, widget):
+		pass

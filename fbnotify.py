@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import notices
 from Notifier import Notifier
 
 import colorlog
@@ -25,6 +26,11 @@ if __name__ == '__main__':
 	root = logging.getLogger('')
 	root.addHandler(sh)
 	root.setLevel(logging.DEBUG)
+
+	# Credits!
+	print('fbnotify')
+	print('License details follow:')
+	print(notices.license)
 
 	# Start!
 	Notifier().start()
