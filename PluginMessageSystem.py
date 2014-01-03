@@ -34,10 +34,10 @@ class PluginMessageSystem:
 			l = self._listeners[c]
 			l[:] = [q for q in l if q.plugin != plugin]
 
-	def send(self, channel, message):
+	def send(self, channel, **kwargs):
 		''' sends a message to all plugins subscribed to the channel '''
 
-		pm = PluginMessage(channel, message)
+		pm = PluginMessage(channel, kwargs)
 		if channel in self._listeners:
 			for q in self._listeners[channel]:
 				q.queue.put(pm)

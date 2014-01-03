@@ -109,7 +109,7 @@ class Notifier:
 			return
 
 		# Update item list
-		self.plugin_man.context.send(
+		self.plugin_man.messaging.send(
 			'list',
 			items = items
 		)
@@ -140,7 +140,7 @@ class Notifier:
 
 		# This will send a message to any plugin
 		# listening to the 'notify' channel
-		self.plugin_man.context.send(
+		self.plugin_man.messaging.send(
 			'notify',
 			title = title,
 			body = body,
@@ -157,14 +157,14 @@ class Notifier:
 		if self.conf.feed.dynamic_interval:
 			ci = self.conf.feed.check_interval
 			if new:
-				min_interval = 15
+				min_interval = 5 # 5 seconds
 				if ci > min_interval:
 					ci = ci * 1/5
 					if ci < min_interval:
 						ci = min_interval
 					logger.info('Decreased check interval to {0}s'.format(ci))
 			else:
-				max_interval = 60 * 20
+				max_interval = 60 * 20 # 20 minutes
 				if ci < max_interval:
 					ci = ci * 9/5
 					if ci > max_interval:

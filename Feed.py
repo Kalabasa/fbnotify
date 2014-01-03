@@ -35,7 +35,7 @@ class Feed:
 			last_mod = email.utils.mktime_tz(email.utils.parsedate_tz(last_mod_str))
 		except IOError:
 			logger.warning('Unable to read ' + self._last_mod_path)
-			logger.info('A new file is created')
+			logger.warning('A new file is created')
 			last_mod = 0#time.mktime(time.localtime())
 			last_mod_str = email.utils.formatdate(last_mod)
 			open(self._last_mod_path, 'w').write(last_mod_str)

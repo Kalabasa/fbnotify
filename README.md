@@ -29,11 +29,12 @@ Libraries
 
 Libraries included are listed here. Files are listed as well.
 
-* https://github.com/ActiveState/appdirs to get configuration directory
+* [ActiveState/appdirs](https://github.com/ActiveState/appdirs) to get configuration directory
 	* appdirs.py
 	* appdirs.pyc
-* https://github.com/borntyping/python-colorlog for colorful logging
-	* colorlog/*
+* [borntyping/python-colorlog](https://github.com/borntyping/python-colorlog) for colorful logging
+	* colorlog/colorlog.py
+	* colorlog/escape_codes.py
 
 License
 =======

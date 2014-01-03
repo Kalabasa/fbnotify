@@ -17,7 +17,7 @@ class PluginContext:
 	def send(self, channel, **kwargs):
 		''' sends a message to a channel '''
 
-		self._context.send(channel, kwargs)
+		self._context.send(channel, **kwargs)
 
 	def receive(self):
 		''' processes the message queue to receive messages '''
