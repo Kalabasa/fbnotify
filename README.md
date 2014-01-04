@@ -17,9 +17,9 @@ Usage
 
 Use at your own risk. This is a work-in-progress.
 
-To run, execute `fbnotify.py` (`./fbnotify.py` or `python fbnotify.py`).
+To run, execute `fbnotify.py`.
 
-To stop, use an interrupt signal (`^C` on *nix)
+To stop, use an interrupt signal `^C`.
 
 Plugins
 -------

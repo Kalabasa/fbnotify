@@ -9,9 +9,10 @@ import logging
 
 if __name__ == '__main__':
 	# Setup logger
+	fh = logging.FileHandler('fbnotify.log')
 	sh = logging.StreamHandler()
 	formatter = colorlog.ColoredFormatter(
-		"%(log_color)s[%(name)s] %(levelname)s: %(message)s%(reset)s",
+		"%(log_color)s[%(name)s] %(levelname)-8s %(message)s%(reset)s",
 		datefmt=None,
 		reset=True,
 		log_colors={
@@ -24,12 +25,11 @@ if __name__ == '__main__':
 	sh.setFormatter(formatter)
 	
 	root = logging.getLogger('')
+	root.addHandler(fh)
 	root.addHandler(sh)
 	root.setLevel(logging.DEBUG)
 
 	# Credits!
-	print('fbnotify')
-	print('License details follow:')
 	print(notices.license)
 
 	# Start!

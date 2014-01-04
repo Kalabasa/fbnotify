@@ -52,7 +52,6 @@ class Notifier:
 			logger.info('Initializing plugins...')
 			self.plugin_man = PluginManager(plugin_dirs)
 			self.plugin_man.load_by_role('notify')
-			self.plugin_man.load_by_role('indicate')
 			self.plugin_man.load_by_role('list')
 			print('')
 
@@ -95,8 +94,10 @@ class Notifier:
 	def stop(self):
 		''' stop the application '''
 
-		logger.info('Unloading all plugins...')
-		self.plugin_man.unload_all()
+		if self.plugin_man:
+			logger.info('Unloading all plugins...')
+			self.plugin_man.unload_all()
+			
 		logger.info('Exit')
 		quit()
 

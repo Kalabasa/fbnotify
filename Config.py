@@ -45,7 +45,7 @@ class Config:
 		cp.read(self._file_path)
 
 		# Constraints
-		check_interval_min = 30
+		check_interval_min = 20
 		item_interval_min = 1
 		itemize_min = 2
 
@@ -54,68 +54,72 @@ class Config:
 		try:
 			self.feed.url = cp.get(self._feed_section, 'url')
 		except ConfigParser.Error as e:
-			logger.error('FATAL: In {0} [{1}], no url found!'.format(self._file_path, self._feed_section))
-			raise e
+			self.feed.url = ''
+			changed = True
 
 		try:
 			self.feed.check_interval = cp.getint(self._feed_section, 'check_interval')
 		except ConfigParser.Error:
 			logger.info('In {0} [{1}], no check_interval found!'.format(self._file_path, self._feed_section))
 			logger.info('Using default {0} seconds per check'.format(self.feed.check_interval))
-			changed = True;
+			changed = True
 		if self.feed.check_interval < check_interval_min:
 			logger.info('[{1}] check_interval ({0}) too low'.format(self.feed.check_interval, self._feed_section))
 			self.feed.check_interval = check_interval_min
 			logger.info('Setting interval to minimum {0}'.format(self.feed.check_interval))
-			changed = True;
+			changed = True
 
 		try:
 			self.feed.dynamic_interval = cp.getboolean(self._feed_section, 'dynamic_interval')
 		except ConfigParser.Error:
 			logger.info('In {0} [{1}], no dynamic_interval found!'.format(self._file_path, self._feed_section))
 			logger.info('Using default {0}'.format(self.feed.dynamic_interval))
-			changed = True;
+			changed = True
 
 		try:
 			self.notification.show_content = cp.getboolean(self._notif_section, 'show_content')
 		except ConfigParser.Error:
 			logger.info('In {0} [{1}], no show_content found!'.format(self._file_path, self._notif_section))
 			logger.info('Using default {0}'.format(self.notification.show_content))
-			changed = True;
+			changed = True
 
 		try:
 			self.notification.item_interval = cp.getint(self._notif_section, 'item_interval')
 		except ConfigParser.Error:
 			logger.info('In {0} [{1}], no item_interval found!'.format(self._file_path, self._notif_section))
 			logger.info('Using default {0} seconds per item'.format(self.notification.item_interval))
-			changed = True;
+			changed = True
 		if self.notification.item_interval < item_interval_min:
 			logger.info('[{1}] item_interval ({0}) too low'.format(self.notification.item_interval, self._notif_section))
 			self.notification.item_interval = item_interval_min
 			logger.info('Setting item_interval to minimum {0}'.format(self.notification.item_interval))
-			changed = True;
+			changed = True
 
 		try:
 			self.notification.itemize = cp.getint(self._notif_section, 'itemize')
 		except ConfigParser.Error:
 			logger.info('In {0} [{1}], no itemize found!'.format(self._file_path, self._notif_section))
 			logger.info('Using default {0}'.format(self.notification.itemize))
-			changed = True;
+			changed = True
 		if self.notification.itemize != 0 and self.notification.itemize < itemize_min:
 			logger.info('[{1}] itemize ({0}) value invalid'.format(self.notification.itemize, self._notif_section))
 			self.notification.itemize = itemize_min
-			changed = True;
+			changed = True
 			logger.info('Setting itemize to {0}'.format(self.notification.item_interval))
 		if self.notification.itemize > 0 and not self.notification.show_content:
 			logger.info('itemize=True but show_content=False')
 			logger.info('No point in itemizing if content is not shown')
 			self.notification.show_content = True
 			logger.info('Setting show_content to {0}'.format(self.notification.show_content))
-			changed = True;
+			changed = True
 
 		# Save changes due to constraints
 		if changed:
 			self.save()
+
+		if not self.feed.url:
+			logger.error('FATAL: In {0} [{1}], no url found!'.format(self._file_path, self._feed_section))
+			raise Exception()
 
 	def save(self):
 		''' saves current configuration to file '''
@@ -132,7 +136,7 @@ class Config:
 		cp.set(self._notif_section, 'itemize', self.notification.itemize)
 		cp.set(self._notif_section, 'item_interval', self.notification.item_interval)
 
-		conf_file = open(self.file_path,'w')
+		conf_file = open(self._file_path,'w')
 		conf_file.write(
 """\
 # Configuration file for fbnotify
@@ -148,4 +152,4 @@ class Config:
 #
 
 """)
-		self.cp.write(conf_file)
+		cp.write(conf_file)

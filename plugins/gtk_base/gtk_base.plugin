@@ -1,0 +1,4 @@
+[plugin]
+module = gtk_base_plugin
+dependencies =
+channels = 

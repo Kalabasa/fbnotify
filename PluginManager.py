@@ -46,13 +46,13 @@ class PluginManager:
 		return self._plugins
 
 
-	def load(self, plugin_data):
+	def load(self, plugin_data, register_channels=True):
 		''' loads a plugin '''
 
-		logger.debug('Attempting to load plugin: ' + plugin_data.name)
+		logger.debug('Attempting to load plugin: ' + plugin_data.name + '...')
 
 		if plugin_data.name in self._active:
-			logger.warning('Plugin ' + plugin_data.name + ' is already loaded!')
+			logger.warning(plugin_data.name + ' is already loaded!')
 			return self._active[plugin_data.name]
 
 		try:
@@ -60,9 +60,8 @@ class PluginManager:
 
 			depend = plugin_data.dependencies
 			if depend:
-				logger.debug('Loading dependencies for plugin: ' + plugin_data.name)
 				for p in depend:
-					logger.debug('Depends on ' + p)
+					logger.debug(plugin_data.name + ' depends on ' + p)
 					if not self.load_by_name(p):
 						logger.warning('Unable to satisfy the dependencies for ' + plugin_data.name)
 						logger.warning('Unable to load plugin: ' + plugin_data.name)
@@ -70,8 +69,9 @@ class PluginManager:
 
 			plugin = module.Plugin()
 
-			if plugin_data.channels:
-				plugin.context = self.messaging.register_plugin(plugin, plugin_data.channels)
+			if register_channels:
+				for c in plugin_data.channels:
+					self.messaging.register_plugin(plugin, c)
 
 			plugin.__thread = Thread(target=lambda: self._start(plugin))
 			plugin.__thread.daemon = True
@@ -91,7 +91,7 @@ class PluginManager:
 	def unload(self, name):
 		''' unloads a plugin '''
 
-		logger.debug('Attempting to unload plugin: ' + name)
+		logger.debug('Attempting to unload plugin: ' + name + '...')
 
 		if not name in self._active:
 			logger.error('Plugin ' + name + ' nonexistent or inactive!')
@@ -113,7 +113,7 @@ class PluginManager:
 	def load_by_role(self, role):
 		''' loads a plugin '''
 
-		logger.debug('Loading plugin for role: ' + role)
+		logger.debug('Finding plugin for role: ' + role)
 
 		# Get plugins that satisfy this role
 		candidate_plugins = []
@@ -129,8 +129,10 @@ class PluginManager:
 
 		# Try to load all starting from the highest
 		for p in candidate_plugins:
-			loaded = self.load(p)
+			loaded = self.load(p, False)
 			if loaded:
+				for c in p.channels:
+					self.messaging.register_plugin(loaded, c)
 				return loaded
 
 		logger.error('No plugin loaded for role: ' + role)
@@ -162,7 +164,7 @@ class PluginManager:
 		for n in self._active:
 			active.append(n)
 
-		for n in active:
+		for n in reversed(active):
 			self.unload(n)
 
 

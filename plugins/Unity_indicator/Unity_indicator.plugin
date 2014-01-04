@@ -1,0 +1,4 @@
+[plugin]
+module = Unity_indicator_plugin
+dependencies = gtk_base
+channels = list:190

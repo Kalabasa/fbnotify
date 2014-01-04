@@ -1,31 +1,27 @@
 import notices
 from PluginBase import PluginBase
 
-import pygtk
-pygtk.require('2.0')
 import gtk
 import gobject
+import appindicator
 
 import webbrowser
 import time
 
 
 class Plugin(PluginBase):
-	''' provides status icon in the notification area '''
+	''' provides an app indicator icon for Unity '''
 
 	running = False
-	icon = None
+	indicator = None
 	items = []
 
 	def plugin_init(self):
-		# Create a StatusIcon
-		self.icon = gtk.StatusIcon()
-		self.icon.set_from_icon_name('facebook')
-		self.icon.set_tooltip('fbnotify')
-		self.icon.set_visible(True)
+		# Create the indicator
+		self.indicator =  appindicator.Indicator('fbnotify', 'facebook', appindicator.CATEGORY_APPLICATION_STATUS)
+		self.indicator.set_status(appindicator.STATUS_ACTIVE)
 
-		# Respond to clicks
-		self.icon.connect('popup-menu', self.popup_menu)
+		self.update_menu()
 
 		# Poll messages periodically
 		self.running = True
@@ -45,7 +41,9 @@ class Plugin(PluginBase):
 		self.items = new_items + self.items
 		del self.items[:-10]
 
-	def popup_menu(self, icon, button, time):
+		self.update_menu()
+
+	def update_menu(self):
 		menu = gtk.Menu()
 
 		if self.items:
@@ -77,7 +75,7 @@ class Plugin(PluginBase):
 
 		menu.show_all()
 
-		menu.popup(None, None, gtk.status_icon_position_menu, button, time, self.icon)
+		self.indicator.set_menu(menu)
 
 	def menu_launch(self, widget):
 		webbrowser.open('www.facebook.com')

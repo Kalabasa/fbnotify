@@ -17,18 +17,18 @@ class PluginMessageSystem:
 
 	_listeners = {}
 
-	def register_plugin(self, plugin, channels):
-		''' subscribes a plugin to multiple channels '''
-		queue = Queue()
-		plugin_queue = PluginQueue(plugin, queue)
-		context = PluginContext(self, plugin, queue)
+	def register_plugin(self, plugin, channel):
+		''' subscribes a plugin to a channel '''
 
-		for c in channels:
-			if not c in self._listeners:
-				self._listeners[c] = []
-			self._listeners[c].append(plugin_queue)
+		plugin_queue = self.find_plugin_queue(plugin)
+		if not plugin_queue:
+			queue = Queue()
+			plugin_queue = PluginQueue(plugin, queue)
+			plugin.context = PluginContext(self, plugin, queue)
 
-		return context
+		if not channel in self._listeners:
+			self._listeners[channel] = []
+		self._listeners[channel].append(plugin_queue)
 
 	def unregister_plugin(self, plugin):
 		''' unregisters a plugin from all channels '''
@@ -36,6 +36,15 @@ class PluginMessageSystem:
 		for c in self._listeners:
 			l = self._listeners[c]
 			l[:] = [q for q in l if q.plugin != plugin]
+
+	def find_plugin_queue(self, plugin):
+		''' return the PluginQueue associated with a plugin '''
+
+		for c in self._listeners:
+			for q in self._listeners[c]:
+				if q.plugin == plugin:
+					return q
+		return None
 
 	def send(self, channel, **kwargs):
 		''' sends a message to all plugins subscribed to the channel '''

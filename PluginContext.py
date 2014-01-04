@@ -16,6 +16,12 @@ class PluginContext:
 		self._plugin = plugin
 		self._queue = queue
 
+	def register(self, channel):
+		self._context.register_plugin(self._plugin, channel)
+
+	def unregister(self, channel):
+		self._context.unregister_plugin(self._plugin)
+
 	def send(self, channel, **kwargs):
 		''' sends a message to a channel '''
 
