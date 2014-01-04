@@ -63,6 +63,10 @@ Plugins are located in the `plugins/` directory or in `~/.config/fbnotify/plugin
 * Windows notifications
 * Windows status icon
 
+### Contribute ###
+
+Create plugins (annihilate the above list)
+
 Libraries
 =========
 
