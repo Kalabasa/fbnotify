@@ -18,12 +18,14 @@ Copy everything to any directory.
 
 You need to configure it to listen to your Facebook notifications feed.
 
-First, execute `fbnotify.py`. It will show an error saying `no url found`. This URL, which is your FB feed, is needed by the program. To get this URL:
+First, execute `fbnotify.py`. It will show an error saying `no url found`. This URL, which is your FB feed, is needed by the program.
 
-1. Go to www.facebook.com/notifications.
-2. Copy the **RSS** link in the **Get notifications via:** part.
-3. Open the configuration file. See the terminal output for the path. This is usually at `~/.config/fbnotify/fbnotify.conf`
-4. Paste the URL to the `url` field in the `[feed]` section.
+To get this URL:
+
+	1. Go to www.facebook.com/notifications.
+	2. Copy the **RSS** link in the **Get notifications via:** part.
+	3. Open the configuration file. See the terminal output for the path. This is usually at `~/.config/fbnotify/fbnotify.conf`
+	4. Paste the URL to the `url` field in the `[feed]` section.
 
 Usage
 -----
