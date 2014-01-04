@@ -85,3 +85,6 @@ This software is released under the **GNU General Public License** (GPL) which
 can be found in the file **LICENSE** in the same directory as this file.
 
 Licenses for the included libraries can be found in the same directory in the files **_{name}_.LICENSE** where _{name}_ is the name of the library.
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/Kalabasa/fbnotify/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
