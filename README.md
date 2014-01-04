@@ -7,8 +7,12 @@ This is still in-development!
 
 It runs in the background and notifies you whenever you get a notification in Facebook. Notifications come to you instead of you coming for them.
 
-Installation
-------------
+[fbnotify notification screenshot](http://i.imgur.com/OFotbMk.png 'Desktop notification')
+
+[fbnotify status icon screenshot](http://i.imgur.com/05dtT1K.png 'Status icon shows up in the panel')
+
+Setup
+-----
 
 Copy everything to any directory.
 
@@ -27,6 +31,13 @@ Usage
 To run, execute `fbnotify.py`. It is supposed to be ran in the background.
 
 To stop, use an interrupt signal `^C` and wait for it to finish.
+
+Configuration
+-------------
+
+`~/.config/fbnotify/fbnotify.conf`
+
+*TODO*
 
 Plugins
 -------
