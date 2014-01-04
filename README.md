@@ -33,19 +33,12 @@ Plugins
 There is a plugin system to aid in making it cross-platform.
 
 * pynotify
-	
 	Plugin to handle notifications using libnotify.
-
 * Growl
-	
 	**UNTESTED** Plugin for showing notifications using Growl
-
 * PyGTK
-
 	Plugin for displaying a status icon in the notification area
-
 * Unity_indicator
-
 	Plugin for displaying an app indicator for Unity
 
 ### Not Yet Implemented ###
