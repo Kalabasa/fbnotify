@@ -7,9 +7,9 @@ This is still in-development!
 
 It runs in the background and notifies you whenever you get a notification in Facebook. Notifications come to you instead of you coming for them.
 
-[fbnotify notification screenshot](http://i.imgur.com/OFotbMk.png 'Desktop notification')
+![fbnotify notification screenshot](http://i.imgur.com/OFotbMk.png "Desktop notification")
 
-[fbnotify status icon screenshot](http://i.imgur.com/05dtT1K.png 'Status icon shows up in the panel')
+![fbnotify status icon screenshot](http://i.imgur.com/05dtT1K.png "Status icon shows up in the panel")
 
 Setup
 -----
