@@ -15,6 +15,7 @@ Simply copy everything to any directory.
 You need to configure it to listen to your Facebook notifications feed.
 
 First, execute `fbnotify.py`. It will show an error saying 'no url found'. This URL is your FB feed. To get this URL:
+
 1. Go to www.facebook.com/notifications.
 2. Copy the RSS link.
 3. Open the configuration file. (See the terminal output for the path. This is usually at `~/.config/fbnotify/fbnotify.conf`.)
@@ -33,17 +34,17 @@ Plugins
 There is a plugin system to aid in making it cross-platform.
 
 * pynotify
-	Plugin to handle notifications using libnotify.
+	* Plugin to handle notifications using libnotify.
 * Growl
-	**UNTESTED** Plugin for showing notifications using Growl
+	* **UNTESTED** Plugin for showing notifications using Growl
 * PyGTK
-	Plugin for displaying a status icon in the notification area
+	* Plugin for displaying a status icon in the notification area
 * Unity_indicator
-	Plugin for displaying an app indicator for Unity
+	* Plugin for displaying an app indicator for Unity
 
 ### Not Yet Implemented ###
 
-* Unity Messaging Menu plugin
+* Unity Messaging Menu
 * GTK status icon notifications (not libnotify)
 * Windows notifications
 * Windows status icon
