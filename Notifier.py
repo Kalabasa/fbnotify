@@ -90,8 +90,15 @@ class Notifier:
 				logger.info('Updating...')
 				
 				try:
+					# Update the feed
+					self.plugin_man.messaging.send(
+						'status',
+						status='updating',
+						description='Updating'
+					)
 					new_items = self.feed.get_new_items()
 				except IOError:
+					# Error
 					logger.error('Unable to load feed!')
 					self.plugin_man.messaging.send(
 						'status',
@@ -99,9 +106,17 @@ class Notifier:
 						description='Unable to load feed URL'
 					)
 
+				# If new items are loaded
 				if new_items is not None:
 					self.notify_items(new_items)
 					self.adjust_interval(len(new_items))
+
+				# Wait
+				self.plugin_man.messaging.send(
+					'status',
+					status='idle',
+					description='Waiting'
+				)
 
 				count = 0
 				while count < self.conf.feed.check_interval:

@@ -34,6 +34,8 @@ class Plugin(PluginBase):
 	running = False
 	indicator = None
 	items = []
+	status = None
+	message = None
 
 	def plugin_init(self):
 		# Create the indicator
@@ -44,10 +46,21 @@ class Plugin(PluginBase):
 		self.update_menu()
 
 		# Poll messages periodically
+		count = 0
 		self.running = True
 		while self.context and self.running:
 			self.context.receive()
 			time.sleep(1)
+			
+			# Animate when updating
+			if status == 'updating':
+				updating_frames = [
+					icons.icon_updating_path,
+					icons.icon_updating2_path,
+					icons.icon_updating3_path
+				]
+				self.indicator.set_icon(updating_frames[count])
+				count = 0 if count == 2 else count + 1
 
 	def plugin_destroy(self):
 		self.running = False
@@ -65,8 +78,16 @@ class Plugin(PluginBase):
 		self.update_menu()
 
 	def status(self, message):
-		if message['status'] == 'error':
-			
+		status = message['status']
+		if status == 'idle':
+			self.indicator.set_icon(icons.icon_path)
+			self.message = None
+		elif status == 'updating':
+			self.indicator.set_icon(icons.icon_updating_path)
+			self.message = 'Updating...'
+		elif status == 'error':
+			self.indicator.set_icon(icons.icon_error_path)
+			self.message = message['description']
 
 	def update_menu(self):
 		menu = gtk.Menu()
@@ -93,6 +114,12 @@ class Plugin(PluginBase):
 			menu.append(msg)
 
 		menu.append(gtk.SeparatorMenuItem())
+
+		if self.message:
+			msg = gtk.MenuItem(self.message)
+			msg.set_sensitive(False)
+			menu.append(msg)
+			menu.append(gtk.SeparatorMenuItem())
 
 		clear = gtk.ImageMenuItem(gtk.STOCK_CLEAR)
 		refresh = gtk.ImageMenuItem(gtk.STOCK_REFRESH)
