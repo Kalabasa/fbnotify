@@ -122,6 +122,7 @@ class PluginManager:
 				candidate_plugins.append(p)
 
 		if not candidate_plugins:
+			logger.error('No plugin loaded for role: ' + role)
 			return None
 
 		# Sort by descending priority
@@ -134,8 +135,6 @@ class PluginManager:
 				for c in p.channels:
 					self.messaging.register_plugin(loaded, c)
 				return loaded
-
-		logger.error('No plugin loaded for role: ' + role)
 
 		return None
 

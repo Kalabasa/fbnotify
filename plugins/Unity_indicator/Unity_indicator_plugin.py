@@ -38,7 +38,7 @@ class Plugin(PluginBase):
 
 	def list(self, message):
 		new_items = sorted(message['items'], key=lambda x: x.dt)
-		self.items = new_items + self.items
+		self.items = self.items + new_items
 		del self.items[:-10]
 
 		self.update_menu()
@@ -95,4 +95,5 @@ class Plugin(PluginBase):
 		about_dialog.destroy()
 
 	def menu_quit(self, widget):
-		pass
+		self.indicator.set_status(appindicator.STATUS_PASSIVE)
+		self.context.send('fbnotify', quit=True)

@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 class Notifier:
 	''' main class '''
 
-	exec_dir = os.getcwd()
+	program_dir = os.path.dirname(os.path.realpath(__file__))
 	plugin_man = None
+	plugin_context = None
 	conf = None
 	feed = None
 
@@ -33,7 +34,7 @@ class Notifier:
 			logger.info('* Data: ' + dirs.user_data_dir)
 
 			plugin_dirs = []
-			plugin_dirs.append(os.path.join(self.exec_dir, 'plugins'))
+			plugin_dirs.append(os.path.join(self.program_dir, 'plugins'))
 			plugin_dirs.append(os.path.join(dirs.user_data_dir, 'plugins'))
 			for d in plugin_dirs:
 				logger.info('* Plugins: ' + d)
@@ -53,6 +54,7 @@ class Notifier:
 			self.plugin_man = PluginManager(plugin_dirs)
 			self.plugin_man.load_by_role('notify')
 			self.plugin_man.load_by_role('list')
+			self.plugin_context = self.plugin_man.messaging.register_plugin(self, 'fbnotify')
 			print('')
 
 			logger.info('Initializing icons...')
@@ -74,7 +76,12 @@ class Notifier:
 				self.notify_items(new_items)
 				self.adjust_interval(len(new_items))
 
-				time.sleep(self.conf.feed.check_interval)
+				count = 0
+				while(count < self.conf.feed.check_interval):
+					time.sleep(0.25)
+					count += 0.25
+					self.plugin_context.receive()
+
 				print('')
 		except KeyboardInterrupt:
 			print('')
@@ -84,6 +91,12 @@ class Notifier:
 			logger.error(traceback.format_exc())
 			self.bad_stop()
 
+
+	def plugin_receive(self, channel, message):
+		# Receiving a message from the 'fbnotify' channel
+
+		if 'quit' in message:
+			self.stop()
 
 	def bad_stop(self):
 		''' bad things happened, so bad that the application must stop '''
@@ -106,7 +119,7 @@ class Notifier:
 		''' shows notifications about items '''
 
 		n = len(items)
-		n_new_notifications = '{0} new notification{1}'.format(n, '' if n == 1 else 's')
+		n_new_notifications = '{0} new notification{1} [{2}]'.format(n, '' if n == 1 else 's', time.strftime('%Y-%m-%d %X'))
 		logger.info(n_new_notifications)
 		if n == 0:
 			return

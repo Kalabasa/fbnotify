@@ -30,6 +30,8 @@ class PluginMessageSystem:
 			self._listeners[channel] = []
 		self._listeners[channel].append(plugin_queue)
 
+		return plugin.context
+
 	def unregister_plugin(self, plugin):
 		''' unregisters a plugin from all channels '''
 
