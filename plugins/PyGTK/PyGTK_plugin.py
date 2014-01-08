@@ -68,14 +68,18 @@ class Plugin(PluginBase):
 
 		menu.append(gtk.SeparatorMenuItem())
 
+		clear = gtk.MenuItem('Clear')
 		launch = gtk.MenuItem('Launch Facebook Website')
 		about = gtk.MenuItem('About')
 		quit = gtk.MenuItem('Quit')
 
+		clear.connect('activate', self.menu_clear)
 		launch.connect('activate', self.menu_launch)
 		about.connect('activate', self.menu_about)
 		quit.connect('activate', self.menu_quit)
 
+		menu.append(clear)
+		menu.append(launch)
 		menu.append(about)
 		menu.append(quit)
 
