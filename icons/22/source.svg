@@ -16,7 +16,7 @@
    width="22"
    height="22"
    sodipodi:docname="source.svg"
-   inkscape:export-filename="/home/lean/Projects/fbnotify/icons/22/icon-updating3.png"
+   inkscape:export-filename="/home/lean/Projects/fbnotify/icons/22/icon-error.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <metadata
@@ -293,19 +293,19 @@
      objecttolerance="10"
      gridtolerance="10"
      guidetolerance="10"
-     inkscape:pageopacity="1"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1024"
      inkscape:window-height="744"
      id="namedview4"
      showgrid="false"
      inkscape:zoom="10.011989"
-     inkscape:cx="6.0627203"
-     inkscape:cy="7.057724"
+     inkscape:cx="-3.6756044"
+     inkscape:cy="11.052934"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g3951"
+     inkscape:current-layer="g3901"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
@@ -314,7 +314,7 @@
      inkscape:groupmode="layer"
      id="layer1"
      inkscape:label="Idle"
-     style="display:inline"
+     style="display:none"
      transform="translate(-1,6)"
      sodipodi:insensitive="true">
     <path
@@ -331,7 +331,7 @@
   <g
      transform="translate(-1,6)"
      style="display:none"
-     inkscape:label="Update3"
+     inkscape:label="Update2"
      id="g3799"
      inkscape:groupmode="layer"
      sodipodi:insensitive="true">
@@ -350,7 +350,7 @@
   <g
      inkscape:groupmode="layer"
      id="g3901"
-     inkscape:label="Update2"
+     inkscape:label="Update1"
      style="display:none"
      transform="translate(-1,6)"
      sodipodi:insensitive="true">
@@ -369,7 +369,7 @@
   <g
      transform="translate(-1,6)"
      style="display:none"
-     inkscape:label="Update1"
+     inkscape:label="Update3"
      id="g3951"
      inkscape:groupmode="layer"
      sodipodi:insensitive="true">
@@ -413,7 +413,7 @@
      inkscape:groupmode="layer"
      id="g3927"
      inkscape:label="Error"
-     style="display:none"
+     style="display:inline"
      transform="translate(-1,6)"
      sodipodi:insensitive="true">
     <path
