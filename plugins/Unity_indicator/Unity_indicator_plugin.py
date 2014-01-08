@@ -46,11 +46,10 @@ class Plugin(PluginBase):
 		self.update_menu()
 
 		# Poll messages periodically
-		count = 0
+		count = 1
 		self.running = True
 		while self.context and self.running:
 			self.context.receive()
-			time.sleep(1)
 
 			# Animate when updating
 			if self.status == 'updating':
@@ -62,6 +61,10 @@ class Plugin(PluginBase):
 				self.indicator.set_icon(updating_frames[count])
 				count = 0 if count == 2 else count + 1
 
+				time.sleep(0.5) # Faster
+			else:
+				time.sleep(1)
+
 	def plugin_destroy(self):
 		self.running = False
 
@@ -69,7 +72,7 @@ class Plugin(PluginBase):
 		if channel == 'list':
 			self.list(message)
 		elif channel == 'status':
-			self.status(message)
+			self.status_message(message)
 
 	def list(self, message):
 		new_items = sorted(message['items'], key=lambda x: x.dt)
@@ -77,17 +80,20 @@ class Plugin(PluginBase):
 		del self.items[:-10]
 		self.update_menu()
 
-	def status(self, message):
-		status = message['status']
-		if status == 'idle':
+	def status_message(self, message):
+		self.status = message['status']
+		if self.status == 'idle':
 			self.indicator.set_icon(icons.icon_path)
 			self.message = None
-		elif status == 'updating':
+			self.update_menu()
+		elif self.status == 'updating':
 			self.indicator.set_icon(icons.icon_updating_path)
 			self.message = 'Updating...'
-		elif status == 'error':
+			self.update_menu()
+		elif self.status == 'error':
 			self.indicator.set_icon(icons.icon_error_path)
 			self.message = message['description']
+			self.update_menu()
 
 	def update_menu(self):
 		menu = gtk.Menu()
