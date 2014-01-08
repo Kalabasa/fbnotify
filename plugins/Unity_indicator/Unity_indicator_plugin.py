@@ -36,28 +36,39 @@ class Plugin(PluginBase):
 		self.running = False
 
 	def plugin_receive(self, channel, message):
-		# Receive 'list' message
-		self.list(message)
+		if channel == 'list':
+			self.list(message)
+		elif channel == 'status':
+			self.status(message)
 
 	def list(self, message):
 		new_items = sorted(message['items'], key=lambda x: x.dt)
 		self.items = self.items + new_items
 		del self.items[:-10]
-
-		self.indicator.set_status(appindicator.STATUS_ATTENTION)
 		self.update_menu()
+
+	def status(self, message):
+		if message['status'] == 'error':
+			
 
 	def update_menu(self):
 		menu = gtk.Menu()
 
 		if self.items:
 			for i in self.items:
-				menu_item = gtk.MenuItem(self.format_item(i))
+				menu_item = gtk.ImageMenuItem(i.wrapped)
+
 				def get_callback(item):
 					def f(widget):
 						webbrowser.open(item.link)
 					return f
 				menu_item.connect('activate', get_callback(i))
+
+				if i.image_path:
+					item_image = gtk.Image()
+					item_image.set_from_file(i.image_path)
+					menu_item.set_image(item_image)
+
 				menu.append(menu_item)
 		else:
 			msg = gtk.MenuItem('No Notifications')
@@ -66,18 +77,25 @@ class Plugin(PluginBase):
 
 		menu.append(gtk.SeparatorMenuItem())
 
-		clear = gtk.MenuItem('Clear')
-		launch = gtk.MenuItem('Launch Facebook Website')
-		about = gtk.MenuItem('About')
-		quit = gtk.MenuItem('Quit')
+		clear = gtk.ImageMenuItem(gtk.STOCK_CLEAR)
+		refresh = gtk.ImageMenuItem(gtk.STOCK_REFRESH)
+		launch = gtk.ImageMenuItem('Launch Facebook Website')
+		launch_image = gtk.Image()
+		launch_image.set_from_stock(gtk.STOCK_HOME, 22)
+		launch.set_image(launch_image)
+		about = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+		quit = gtk.ImageMenuItem(gtk.STOCK_QUIT)
 
 		clear.connect('activate', self.menu_clear)
+		refresh.connect('activate', self.menu_refresh)
 		launch.connect('activate', self.menu_launch)
 		about.connect('activate', self.menu_about)
 		quit.connect('activate', self.menu_quit)
 
 		menu.append(clear)
+		menu.append(refresh)
 		menu.append(launch)
+		menu.append(gtk.SeparatorMenuItem())
 		menu.append(about)
 		menu.append(quit)
 
@@ -89,8 +107,10 @@ class Plugin(PluginBase):
 
 	def menu_clear(self, widget):
 		del self.items[:]
-		self.indicator.set_status(appindicator.STATUS_ACTIVE)
 		self.update_menu()
+
+	def menu_refresh(self, widget):
+		self.context.send('fbnotify', refresh=True)
 
 	def menu_launch(self, widget):
 		webbrowser.open('www.facebook.com')
@@ -112,6 +132,3 @@ class Plugin(PluginBase):
 	def menu_quit(self, widget):
 		self.indicator.set_status(appindicator.STATUS_PASSIVE)
 		self.context.send('fbnotify', quit=True)
-
-	def format_item(self, item):
-		return textwrap.fill(item.text, 40)

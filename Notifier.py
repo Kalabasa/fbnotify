@@ -22,11 +22,11 @@ class Notifier:
 	plugin_context = None
 	conf = None
 	feed = None
+	do_refresh = False
 
 	def __init__(self):
 		try:
 			logger.info('Initializing directories...')
-			logger.debug('* Work: ' + os.getcwd())
 
 			dirs = self.init_dirs()
 			os.chdir(dirs.user_cache_dir)
@@ -54,9 +54,12 @@ class Notifier:
 			self.plugin_man = PluginManager(plugin_dirs)
 			self.plugin_man.load_by_role('notify')
 			self.plugin_man.load_by_role('list')
+			self.plugin_man.load_by_role('status')
 			self.plugin_context = self.plugin_man.messaging.register_plugin(self, 'fbnotify')
 			print('')
 
+			logger.debug('Work dir: ' + os.getcwd())
+			print
 		except Exception as e:
 			logger.error(traceback.format_exc())
 			self.bad_stop()
@@ -69,15 +72,29 @@ class Notifier:
 			while True:
 				logger.info('Updating...')
 				
-				new_items = self.feed.get_new_items()
-				self.notify_items(new_items)
-				self.adjust_interval(len(new_items))
+				try:
+					new_items = self.feed.get_new_items()
+				except IOError:
+					logger.error('Unable to load feed!')
+					self.plugin_man.messaging.send(
+						'status',
+						status='error',
+						description='Unable to load feed URL'
+					)
+
+				if new_items is not None:
+					self.notify_items(new_items)
+					self.adjust_interval(len(new_items))
 
 				count = 0
-				while(count < self.conf.feed.check_interval):
+				while count < self.conf.feed.check_interval:
 					time.sleep(0.25)
 					count += 0.25
 					self.plugin_context.receive()
+					if self.do_refresh:
+						break
+
+				self.do_refresh = False
 
 				print('')
 		except KeyboardInterrupt:
@@ -91,9 +108,12 @@ class Notifier:
 
 	def plugin_receive(self, channel, message):
 		# Receiving a message from the 'fbnotify' channel
-
 		if 'quit' in message:
+			logger.debug('Quit requested')
 			self.stop()
+		elif 'refresh' in message:
+			logger.debug('Refresh requested')
+			self.do_refresh = True
 
 	def bad_stop(self):
 		''' bad things happened, so bad that the application must stop '''
@@ -116,8 +136,8 @@ class Notifier:
 		''' shows notifications about items '''
 
 		n = len(items)
-		n_new_notifications = '{0} new notification{1} [{2}]'.format(n, '' if n == 1 else 's', time.strftime('%Y-%m-%d %X'))
-		logger.info(n_new_notifications)
+		n_new_notifications = '{0} new notification{1}'.format(n, '' if n == 1 else 's')
+		logger.info(n_new_notifications + ' [' + time.strftime('%Y-%m-%d %X') + ']')
 		if n == 0:
 			return
 

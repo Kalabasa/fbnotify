@@ -21,7 +21,7 @@ class Feed:
 	def __init__(self, feed_url):
 		self.feed_url = feed_url
 		self.link = ''
-		self._last_mod_path = os.path.abspath('.last-modified')
+		self._last_mod_path = os.path.abspath('last-modified')
 
 
 	def get_new_items(self):
@@ -56,7 +56,7 @@ class Feed:
 		except IOError as e:
 			# Connection error
 			logger.error('Unable to load feed URL')
-			return []
+			raise e
 
 		n = 0
 		news = []
@@ -78,8 +78,9 @@ class Feed:
 				if pub <= last_mod:
 					break
 				title = node.find('title').text
+				full = node.find('description').text
 				link = node.find('link').text
 				dt = datetime.fromtimestamp(pub)
-				news.append(Item(title, link, dt))
+				news.append(Item(title, link, full, dt))
 
 		return news
