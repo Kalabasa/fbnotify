@@ -1,3 +1,5 @@
+# THIS FILE CONTAINS THINGS ABOUT ICONS
+
 import os
 
 _program_dir = os.path.dirname(os.path.realpath(__file__))
