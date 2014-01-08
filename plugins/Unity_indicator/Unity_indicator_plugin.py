@@ -51,9 +51,9 @@ class Plugin(PluginBase):
 		while self.context and self.running:
 			self.context.receive()
 			time.sleep(1)
-			
+
 			# Animate when updating
-			if status == 'updating':
+			if self.status == 'updating':
 				updating_frames = [
 					icons.icon_updating_path,
 					icons.icon_updating2_path,
