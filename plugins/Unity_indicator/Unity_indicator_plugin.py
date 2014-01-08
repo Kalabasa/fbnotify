@@ -7,6 +7,7 @@ import gobject
 import appindicator
 
 import webbrowser
+import textwrap
 import time
 
 
@@ -51,7 +52,7 @@ class Plugin(PluginBase):
 
 		if self.items:
 			for i in self.items:
-				menu_item = gtk.MenuItem(i.text)
+				menu_item = gtk.MenuItem(self.format_item(i))
 				def get_callback(item):
 					def f(widget):
 						webbrowser.open(item.link)
@@ -80,12 +81,14 @@ class Plugin(PluginBase):
 		menu.append(about)
 		menu.append(quit)
 
+		clear.set_sensitive(bool(self.items))
+
 		menu.show_all()
 
 		self.indicator.set_menu(menu)
 
 	def menu_clear(self, widget):
-		del items[:]
+		del self.items[:]
 		self.indicator.set_status(appindicator.STATUS_ACTIVE)
 		self.update_menu()
 
@@ -109,3 +112,6 @@ class Plugin(PluginBase):
 	def menu_quit(self, widget):
 		self.indicator.set_status(appindicator.STATUS_PASSIVE)
 		self.context.send('fbnotify', quit=True)
+
+	def format_item(self, item):
+		return textwrap.fill(item.text, 40)
