@@ -1,5 +1,6 @@
 import notices
 from PluginBase import PluginBase
+import icons
 
 import gtk
 import gobject
@@ -18,8 +19,9 @@ class Plugin(PluginBase):
 
 	def plugin_init(self):
 		# Create the indicator
-		self.indicator =  appindicator.Indicator('fbnotify', 'facebook', appindicator.CATEGORY_APPLICATION_STATUS)
+		self.indicator =  appindicator.Indicator('fbnotify', icons.icon_path, appindicator.CATEGORY_APPLICATION_STATUS)
 		self.indicator.set_status(appindicator.STATUS_ACTIVE)
+		self.indicator.set_attention_icon(icons.icon_new_path)
 
 		self.update_menu()
 
@@ -41,6 +43,7 @@ class Plugin(PluginBase):
 		self.items = self.items + new_items
 		del self.items[:-10]
 
+		self.indicator.set_status(appindicator.STATUS_ATTENTION)
 		self.update_menu()
 
 	def update_menu(self):
@@ -66,6 +69,7 @@ class Plugin(PluginBase):
 		about = gtk.MenuItem('About')
 		quit = gtk.MenuItem('Quit')
 
+		clear.connect('activate', self.menu_clear)
 		launch.connect('activate', self.menu_launch)
 		about.connect('activate', self.menu_about)
 		quit.connect('activate', self.menu_quit)
@@ -76,6 +80,11 @@ class Plugin(PluginBase):
 		menu.show_all()
 
 		self.indicator.set_menu(menu)
+
+	def menu_clear(self, widget):
+		del items[:]
+		self.indicator.set_status(appindicator.STATUS_ACTIVE)
+		self.update_menu()
 
 	def menu_launch(self, widget):
 		webbrowser.open('www.facebook.com')

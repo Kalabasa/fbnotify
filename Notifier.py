@@ -57,9 +57,6 @@ class Notifier:
 			self.plugin_context = self.plugin_man.messaging.register_plugin(self, 'fbnotify')
 			print('')
 
-			logger.info('Initializing icons...')
-			self.init_icons()
-			print('')
 		except Exception as e:
 			logger.error(traceback.format_exc())
 			self.bad_stop()
@@ -160,10 +157,7 @@ class Notifier:
 			'notify',
 			title = title,
 			body = body,
-			timeout = timeout,
-			xdg_icon = self.xdg_icon,
-			icon_path = self.icon_path,
-			icon_data = self.icon_data,
+			timeout = timeout
 		)
 
 
@@ -205,12 +199,6 @@ class Notifier:
 			os.makedirs(cache_dir)
 
 		return dirs
-
-	def init_icons(self):
-		# Set icon
-		self.xdg_icon = 'facebook'
-		self.icon_path = None
-		self.icon_data = open(self.icon_path, 'rb').read() if self.icon_path else None
 
 
 	def format_time(self, then):

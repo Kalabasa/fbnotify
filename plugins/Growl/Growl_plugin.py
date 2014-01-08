@@ -1,4 +1,5 @@
 from PluginBase import PluginBase
+import icons
 
 import gntp.notifier
 
@@ -39,7 +40,7 @@ class Plugin(PluginBase):
 			noteType = 'Notifications',
 			title = message['title'],
 			description = message['body'],
-			icon = message['icon_data'],
+			icon = icons.icon_data,
 			callback = message['link'],
 			sticky = False,
 			priority = 1,

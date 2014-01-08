@@ -1,5 +1,6 @@
 import notices
 from PluginBase import PluginBase
+import icons
 
 import pygtk
 pygtk.require('2.0')
@@ -20,7 +21,7 @@ class Plugin(PluginBase):
 	def plugin_init(self):
 		# Create a StatusIcon
 		self.icon = gtk.StatusIcon()
-		self.icon.set_from_icon_name('facebook')
+		self.icon.set_from_file(icons.icon_path)
 		self.icon.set_tooltip('fbnotify')
 		self.icon.set_visible(True)
 
@@ -44,8 +45,11 @@ class Plugin(PluginBase):
 		new_items = sorted(message['items'], key=lambda x: x.dt)
 		self.items = self.items + new_items
 		del self.items[:-10]
+		self.icon.set_from_file(icons.icon_new_path)
 
 	def popup_menu(self, icon, button, time):
+		self.icon.set_from_file(icons.icon_path)
+		
 		menu = gtk.Menu()
 
 		if self.items:
@@ -78,6 +82,11 @@ class Plugin(PluginBase):
 		menu.show_all()
 
 		menu.popup(None, None, gtk.status_icon_position_menu, button, time, self.icon)
+
+	def menu_clear(self, widget):
+		del items[:]
+		clear.connect('activate', self.menu_clear)
+		self.update_menu()
 
 	def menu_launch(self, widget):
 		webbrowser.open('www.facebook.com')

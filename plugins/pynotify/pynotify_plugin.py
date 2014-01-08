@@ -1,4 +1,5 @@
 from PluginBase import PluginBase
+import icons
 
 import pynotify
 
@@ -29,7 +30,7 @@ class Plugin(PluginBase):
 		# Receiving a message from the 'notify' channel
 
 		# Show notification
-		n = pynotify.Notification(message['title'], message['body'], message['xdg_icon'])
+		n = pynotify.Notification(message['title'], message['body'], icons.xdg_icon)
 		if 'timeout' in message:
 			n.set_timeout(message['timeout'])
 		n.show()
