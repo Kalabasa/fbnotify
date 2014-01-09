@@ -72,6 +72,7 @@ class PluginManager:
 		logger.debug('Attempting to load plugin: ' + plugin_data.name + '...')
 		if plugin_data.name in self.blacklist:
 			logger.info('Plugin is blacklisted: ' + plugin_data.name)
+			return None
 
 		if plugin_data.name in self._active:
 			logger.warning(plugin_data.name + ' is already loaded!')

@@ -58,7 +58,6 @@ class Plugin(PluginBase):
 		self.update_menu()
 
 		# Respond to clicks
-		self.icon.connect('activate', self.popup_menu)
 		self.icon.connect('popup-menu', self.popup_menu)
 
 		# Poll messages periodically
