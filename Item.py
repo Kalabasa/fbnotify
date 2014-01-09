@@ -62,12 +62,8 @@ class Item:
 
 		# Check if there is already a cached picture
 		file_path = os.path.join(images_directory, hashlib.sha1(user).hexdigest())
-		logger.debug('File for ' + user + ': ' + file_path)
 		if os.path.isfile(file_path):
-			logger.debug('Has cached image for ' + user)
-			if random.random() < 0.1:
-				logger.debug('Random update')
-			else:
+			if random.random() > 0.06:
 				return file_path
 
 		# Save the picture to cache
@@ -78,6 +74,7 @@ class Item:
 			f = open(file_path, 'w')
 			f.write(image.read())
 			f.close()
+			os.chmod(file_path, 0600)
 			time.sleep(1.5 * random.random())
 		except IOError:
 			return None

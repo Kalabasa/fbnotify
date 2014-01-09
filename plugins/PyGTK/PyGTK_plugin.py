@@ -24,6 +24,7 @@ pygtk.require('2.0')
 import gtk
 import gobject
 
+from datetime import datetime
 import webbrowser
 import time
 
@@ -32,84 +33,194 @@ class Plugin(PluginBase):
 	''' provides status icon in the notification area '''
 
 	running = False
+
 	icon = None
+	menu = None
+	menu_notif_items = []
+	menu_handlers = []
+
 	items = []
+	has_new_items = False
+	max_items = 10
+
+	status = None
+	message = None
+	last_refresh = None
 
 	def plugin_init(self):
 		# Create a StatusIcon
 		self.icon = gtk.StatusIcon()
 		self.icon.set_from_file(icons.icon_path)
-		self.icon.set_tooltip('fbnotify')
+		self.icon.set_tooltip_text('fbnotify')
 		self.icon.set_visible(True)
 
+		self.create_menu()
+		self.update_menu()
+
 		# Respond to clicks
+		self.icon.connect('activate', self.popup_menu)
 		self.icon.connect('popup-menu', self.popup_menu)
 
 		# Poll messages periodically
+		count = 1
 		self.running = True
 		while self.context and self.running:
 			self.context.receive()
-			time.sleep(1)
+
+			# Animate when updating
+			if self.status == 'updating':
+				self.icon.set_from_file(icons.icon_updating_paths[count])
+				count = 0 if count == 4 else count + 1
+
+				if count == 1:
+					time.sleep(0.3)
+				time.sleep(0.1)
+			else:
+				time.sleep(1)
 
 	def plugin_destroy(self):
+		self.menu.popdown()
 		self.running = False
 
 	def plugin_receive(self, channel, message):
-		# Receive 'list' message
-		self.list(message)
+		if channel == 'list':
+			self.list(message)
+		elif channel == 'status':
+			self.status_message(message)
 
 	def list(self, message):
 		new_items = sorted(message['items'], key=lambda x: x.dt)
 		self.items = self.items + new_items
-		del self.items[:-10]
-		self.icon.set_from_file(icons.icon_new_path)
+		del self.items[:-self.max_items]
+		self.has_new_items = True
+		self.update_menu()
+
+	def status_message(self, message):
+		self.status = message['status']
+		if self.status == 'idle':
+			self.message = None
+			self.update_menu()
+
+			self.icon.set_from_file(icons.icon_path)
+			if self.items:
+				self.icon.set_tooltip_text(self.items[-1].wrapped)
+			else:
+				self.icon.set_tooltip_text('No Notifications')
+		elif self.status == 'updating':
+			self.message = None
+			self.last_refresh = datetime.now()
+			self.update_menu()
+
+			self.icon.set_from_file(icons.icon_updating_paths[0])
+			self.icon.set_tooltip_text('Refreshing...')
+		elif self.status == 'error':
+			self.message = message['description']
+			self.update_menu()
+
+			self.icon.set_from_file(icons.icon_error_path)
+			self.icon.set_tooltip_text(self.message)
 
 	def popup_menu(self, icon, button, time):
 		self.icon.set_from_file(icons.icon_path)
-		
+		self.update_menu()
+		self.menu.popup(None, None, gtk.status_icon_position_menu, button, time, self.icon)
+
+	def create_menu(self):
 		menu = gtk.Menu()
 
-		if self.items:
-			for i in self.items:
-				menu_item = gtk.MenuItem(i.wrapped)
+		for i in range(0,self.max_items):
+			menu_item = gtk.ImageMenuItem('Notification')
+			menu.append(menu_item)
+			self.menu_notif_items.append(menu_item)
+			self.menu_handlers.append(None)
+
+		self.msg_mi = gtk.MenuItem('No Notifications')
+		self.msg_mi.set_sensitive(False)
+		menu.append(self.msg_mi)
+
+		menu.append(gtk.SeparatorMenuItem())
+
+		self.clear_mi = gtk.ImageMenuItem(gtk.STOCK_CLEAR)
+		self.refresh_mi = gtk.ImageMenuItem(gtk.STOCK_REFRESH)
+		self.launch_mi = gtk.ImageMenuItem('Launch Facebook Website')
+		launch_image = gtk.Image()
+		launch_image.set_from_stock(gtk.STOCK_HOME, gtk.ICON_SIZE_MENU)
+		self.launch_mi.set_image(launch_image)
+		self.about_mi = gtk.ImageMenuItem(gtk.STOCK_ABOUT)
+		self.quit_mi = gtk.ImageMenuItem(gtk.STOCK_QUIT)
+
+		self.clear_mi.connect('activate', self.menu_clear)
+		self.refresh_mi.connect('activate', self.menu_refresh)
+		self.launch_mi.connect('activate', self.menu_launch)
+		self.about_mi.connect('activate', self.menu_about)
+		self.quit_mi.connect('activate', self.menu_quit)
+
+		menu.append(self.clear_mi)
+		menu.append(self.refresh_mi)
+		menu.append(self.launch_mi)
+		menu.append(gtk.SeparatorMenuItem())
+		menu.append(self.about_mi)
+		menu.append(self.quit_mi)
+
+		menu.show_all()
+		for w in self.menu_notif_items:
+			w.hide()
+
+		self.menu = menu
+
+	def update_menu(self):
+		if self.has_new_items:
+			index = len(self.menu_notif_items)
+			for item in reversed(self.items):
+				index -= 1
+				menu_item = self.menu_notif_items[index]
+				menu_item.set_label(item.wrapped)
+
 				def get_callback(item):
 					def f(widget):
 						webbrowser.open(item.link)
 					return f
-				menu_item.connect('activate', get_callback(i))
-				menu.append(menu_item)
+				handler = self.menu_handlers[index]
+				if handler:
+					menu_item.disconnect(handler)
+				handler = menu_item.connect('activate', get_callback(item))
+				self.menu_handlers[index] = handler
+
+				if item.image_path:
+					item_image = gtk.Image()
+					item_image.set_from_file(item.image_path)
+					menu_item.set_image(item_image)
+
+				menu_item.show()
+
+			for i in range(0,index):
+				self.menu_notif_items[i].hide()
+
+		if self.message:
+			self.msg_mi.set_label(self.message)
+		elif self.last_refresh:
+			self.msg_mi.set_label('Last Refresh ' + self.last_refresh.strftime('%X'))
+
+		if bool(self.items):
+			self.clear_mi.set_sensitive(True)
+			self.clear_mi.set_label('Clear')
 		else:
-			msg = gtk.MenuItem('No Notifications')
-			msg.set_sensitive(False)
-			menu.append(msg)
+			self.clear_mi.set_sensitive(False)
+			self.clear_mi.set_label('No Notifications')
 
-		menu.append(gtk.SeparatorMenuItem())
-
-		clear = gtk.MenuItem('Clear')
-		launch = gtk.MenuItem('Launch Facebook Website')
-		about = gtk.MenuItem('About')
-		quit = gtk.MenuItem('Quit')
-
-		clear.connect('activate', self.menu_clear)
-		launch.connect('activate', self.menu_launch)
-		about.connect('activate', self.menu_about)
-		quit.connect('activate', self.menu_quit)
-
-		menu.append(clear)
-		menu.append(launch)
-		menu.append(about)
-		menu.append(quit)
-
-		clear.set_sensitive(bool(self.items))
-
-		menu.show_all()
-
-		menu.popup(None, None, gtk.status_icon_position_menu, button, time, self.icon)
+		if self.status == 'updating':
+			self.refresh_mi.set_sensitive(False)
+			self.refresh_mi.set_label('Refreshing...')
+		else:
+			self.refresh_mi.set_sensitive(True)
+			self.refresh_mi.set_label('Refresh')
 
 	def menu_clear(self, widget):
 		del self.items[:]
-		clear.connect('activate', self.menu_clear)
 		self.update_menu()
+
+	def menu_refresh(self, widget):
+		self.context.send('fbnotify', refresh=True)
 
 	def menu_launch(self, widget):
 		webbrowser.open('www.facebook.com')

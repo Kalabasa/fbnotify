@@ -21,7 +21,7 @@ from PluginManager import PluginManager
 
 import appdirs
 
-from datetime import datetime,timedelta
+from datetime import datetime
 import urllib2
 import traceback
 import time
@@ -68,7 +68,7 @@ class Notifier:
 			print('')
 
 			logger.info('Initializing plugins...')
-			self.plugin_man = PluginManager(plugin_dirs)
+			self.plugin_man = PluginManager(plugin_dirs, self.conf.program.plugin_blacklist)
 			self.plugin_man.load_by_role('notify')
 			self.plugin_man.load_by_role('list')
 			self.plugin_man.load_by_role('status')
@@ -89,18 +89,17 @@ class Notifier:
 			while True:
 				logger.info('Updating...')
 				
+				# Update the feed
+				self.plugin_man.messaging.send(
+					'status',
+					status='updating',
+					description='Updating'
+				)
 				new_items = None
 				try:
-					# Update the feed
-					self.plugin_man.messaging.send(
-						'status',
-						status='updating',
-						description='Updating'
-					)
 					new_items = self.feed.get_new_items()
 				except IOError:
 					# Error
-					logger.error('Unable to load feed!')
 					self.plugin_man.messaging.send(
 						'status',
 						status='error',
@@ -112,13 +111,14 @@ class Notifier:
 					self.notify_items(new_items)
 					self.adjust_interval(len(new_items))
 
-				# Wait
-				self.plugin_man.messaging.send(
-					'status',
-					status='idle',
-					description='Waiting'
-				)
+					# Wait
+					self.plugin_man.messaging.send(
+						'status',
+						status='idle',
+						description='Waiting'
+					)
 
+				# Wait
 				count = 0
 				while count < self.conf.feed.check_interval:
 					time.sleep(0.25)

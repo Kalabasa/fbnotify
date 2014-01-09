@@ -26,6 +26,7 @@ import ConfigParser
 import collections
 import re
 import inspect
+import traceback
 import imp
 import os
 
@@ -46,12 +47,14 @@ class PluginManager:
 
 	dirs = []
 	messaging = None
+	blacklist = []
 	_plugins = []
 	_active = {}
 
-	def __init__(self, dirs=None):
+	def __init__(self, dirs=None, blacklist=[]):
 		if dirs:
 			self.dirs.extend(dirs)
+		self.blacklist.extend(blacklist)
 		self.messaging = PluginMessageSystem()
 
 
@@ -67,6 +70,8 @@ class PluginManager:
 		''' loads a plugin '''
 
 		logger.debug('Attempting to load plugin: ' + plugin_data.name + '...')
+		if plugin_data.name in self.blacklist:
+			logger.info('Plugin is blacklisted: ' + plugin_data.name)
 
 		if plugin_data.name in self._active:
 			logger.warning(plugin_data.name + ' is already loaded!')
@@ -100,7 +105,7 @@ class PluginManager:
 
 		except Exception as e:
 			logger.warning('Unable to load plugin: ' + plugin_data.name)
-			logger.warning(str(e))
+			logger.warning(traceback.format_exc())
 			return None
 
 		return plugin
