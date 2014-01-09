@@ -89,6 +89,7 @@ class Notifier:
 			while True:
 				logger.info('Updating...')
 				
+				new_items = None
 				try:
 					# Update the feed
 					self.plugin_man.messaging.send(
