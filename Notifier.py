@@ -18,6 +18,7 @@
 from Feed import Feed
 from Config import Config
 from PluginManager import PluginManager
+import icons
 
 import appdirs
 
@@ -182,11 +183,11 @@ class Notifier:
 
 		if n > 1: # Many notifications
 
-			if self.conf.notification.itemize >= n:
+			if self.conf.notification.itemize >= 0:
 				# Recite notifications if enabled
 				interval = self.conf.notification.item_interval
 				for item in sorted(items, key=lambda x: x.dt):
-					self.notify(item.text, self.format_time(item.dt), interval)
+					self.notify(item.text, self.format_time(item.dt), 'file://' + item.image_path, interval)
 					time.sleep(interval)
 			else:
 				# Declare multiple notifications instead of reciting
@@ -197,12 +198,12 @@ class Notifier:
 
 			item = items[0]
 			if self.conf.notification.show_content:
-				self.notify(item.text, self.format_time(item.dt))
+				self.notify(item.text, self.format_time(item.dt), 'file://' + item.image_path)
 			else:
 				self.notify(n_new_notifications, self.format_time(item.dt))
 
-	def notify(self, title, body, timeout=10):
-		''' shows a notification '''
+	def notify(self, title, body, icon=icons.xdg_icon, timeout=10):
+		''' requests to show a notification '''
 
 		# This will send a message to any plugin
 		# listening to the 'notify' channel
@@ -210,6 +211,7 @@ class Notifier:
 			'notify',
 			title = title,
 			body = body,
+			icon = icon,
 			timeout = timeout
 		)
 

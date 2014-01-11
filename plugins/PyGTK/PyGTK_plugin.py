@@ -60,10 +60,14 @@ class Plugin(PluginBase):
 		# Respond to clicks
 		self.icon.connect('popup-menu', self.popup_menu)
 
+		# Wait for context
+		while not self.context:
+			pass
+
 		# Poll messages periodically
 		count = 1
 		self.running = True
-		while self.context and self.running:
+		while self.running:
 			self.context.receive()
 
 			# Animate when updating

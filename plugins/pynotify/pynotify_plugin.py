@@ -22,6 +22,10 @@ import pynotify
 
 import time
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class Plugin(PluginBase):
 	''' shows notifications using pynotify '''
 
@@ -31,12 +35,19 @@ class Plugin(PluginBase):
 		# Initialize pynotify
 		pynotify.init('fbnotify')
 
+		# Wait for context
+		while not self.context:
+			pass
+
 		# Main loop
 		self.running = True
-		while self.context and self.running:
+		while self.running:
 			# Call PluginContext.receive to get messages
 			self.context.receive()
 			time.sleep(1)
+
+		# Done
+		pynotify.uninit()
 
 	def plugin_destroy(self):
 		# Stop the main loop
@@ -47,7 +58,9 @@ class Plugin(PluginBase):
 		# Receiving a message from the 'notify' channel
 
 		# Show notification
-		n = pynotify.Notification(message['title'], message['body'], icons.xdg_icon)
+		n = pynotify.Notification(message['title'], message['body'], message['icon'])
 		if 'timeout' in message:
 			n.set_timeout(message['timeout'])
-		n.show()
+
+		if not n.show():
+			logger.error('Failed to show notification')

@@ -37,9 +37,13 @@ class Plugin(PluginBase):
 		)
 		self.growl.register()
 
+		# Wait for context
+		while not self.context:
+			pass
+
 		# Main loop
 		self.running = True
-		while self.context and self.running:
+		while self.running:
 			# Call PluginContext.receive to get messages
 			self.context.receive()
 			time.sleep(1)

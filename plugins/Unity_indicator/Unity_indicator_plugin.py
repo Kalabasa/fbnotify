@@ -55,10 +55,14 @@ class Plugin(PluginBase):
 		self.create_menu()
 		self.update_menu()
 
+		# Wait for context
+		while not self.context:
+			pass
+
 		# Poll messages periodically
 		count = 1
 		self.running = True
-		while self.context and self.running:
+		while self.running:
 			self.context.receive()
 
 			# Animate when updating
