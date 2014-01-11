@@ -9,7 +9,7 @@ It runs in the background and notifies you whenever you get a notification in Fa
 
 ![fbnotify notification screenshot](http://i.imgur.com/OFotbMk.png "Desktop notification")
 
-![fbnotify status icon screenshot](http://i.imgur.com/05dtT1K.png "Status icon shows up in the panel")
+![fbnotify status icon screenshot](http://i.imgur.com/xMsVXSE.png "Status icon shows up in the panel")
 
 Setup
 -----
@@ -18,7 +18,7 @@ Copy everything to any directory.
 
 You need to configure it to listen to your Facebook notifications feed.
 
-First, execute `fbnotify.py`. It will show an error saying `no url found`. This URL, which is your FB feed, is needed by the program.
+First, execute `fbnotify.py` (using Python >= 2.7! Not Python 3!). It will show an error saying `no url found`. This URL, which is your FB feed, is needed by the program.
 
 To get this URL:
 
@@ -30,7 +30,7 @@ To get this URL:
 Usage
 -----
 
-To run, execute `fbnotify.py`. It is supposed to be ran in the background.
+To run, execute `fbnotify.py` (using Python >= 2.7. Not Python 3). It is supposed to be ran in the background.
 
 To stop, use an interrupt signal `^C` and wait for it to finish.
 
