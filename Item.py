@@ -69,7 +69,7 @@ class Item:
 		# Save the picture to cache
 		try:
 			logger.debug('Downloading image for ' + user + '...')
-			size = 16
+			size = 24
 			image = urllib2.urlopen('http://graph.facebook.com/' + user + '/picture?width={0}&height={0}'.format(size))
 			f = open(file_path, 'w')
 			f.write(image.read())
