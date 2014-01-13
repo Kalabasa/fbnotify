@@ -98,15 +98,13 @@ class Plugin(PluginBase):
 		if self.status == 'idle':
 			self.indicator.set_icon(icons.icon_path)
 			self.message = None
-			self.update_menu()
 		elif self.status == 'updating':
 			self.indicator.set_icon(icons.icon_updating_paths[0])
 			self.last_refresh = datetime.now()
-			self.update_menu()
 		elif self.status == 'error':
 			self.indicator.set_icon(icons.icon_error_path)
 			self.message = message['description']
-			self.update_menu()
+		self.update_menu()
 
 	def create_menu(self):
 		menu = gtk.Menu()

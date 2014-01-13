@@ -45,7 +45,8 @@ class PluginMessageSystem:
 
 		if not channel in self._listeners:
 			self._listeners[channel] = []
-		self._listeners[channel].append(plugin_queue)
+		if not plugin_queue in self._listeners[channel]:
+			self._listeners[channel].append(plugin_queue)
 
 		return plugin.context
 

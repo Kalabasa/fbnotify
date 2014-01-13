@@ -109,15 +109,13 @@ class Notifier:
 
 				# If new items are loaded
 				if new_items is not None:
-					self.notify_items(new_items)
-					self.adjust_interval(len(new_items))
-
-					# Wait
 					self.plugin_man.messaging.send(
 						'status',
 						status='idle',
 						description='Waiting'
 					)
+					self.notify_items(new_items)
+					self.adjust_interval(len(new_items))
 
 				# Wait
 				count = 0
@@ -183,7 +181,7 @@ class Notifier:
 
 		if n > 1: # Many notifications
 
-			if self.conf.notification.itemize >= 0:
+			if self.conf.notification.itemize >= n:
 				# Recite notifications if enabled
 				interval = self.conf.notification.item_interval
 				for item in sorted(items, key=lambda x: x.dt):
@@ -194,7 +192,7 @@ class Notifier:
 				dt = items[n-1].dt # Earliest notification date
 				self.notify(n_new_notifications, self.format_time(dt))
 
-		elif n == 1: # Single notification
+		else: # Single notification
 
 			item = items[0]
 			if self.conf.notification.show_content:
@@ -222,7 +220,7 @@ class Notifier:
 		if self.conf.feed.dynamic_interval:
 			ci = self.conf.feed.check_interval
 			if new:
-				min_interval = 5 # 5 seconds
+				min_interval = 15 # 15 seconds
 				if ci > min_interval:
 					ci = ci * 1/5
 					if ci < min_interval:
@@ -231,7 +229,7 @@ class Notifier:
 			else:
 				max_interval = 60 * 20 # 20 minutes
 				if ci < max_interval:
-					ci = ci * 9/5
+					ci = ci * 8/7
 					if ci > max_interval:
 						ci = max_interval
 					logger.info('Increased check interval to {0}s'.format(ci))

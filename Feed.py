@@ -54,7 +54,7 @@ class Feed:
 			logger.warning('Unable to read ' + self._last_mod_path)
 			logger.warning('A new file is created')
 			last_mod = 0#time.mktime(time.localtime())
-			last_mod_str = email.utils.formatdate(last_mod)
+			last_mod_str = email.utils.formatdate(last_mod, True)
 			open(self._last_mod_path, 'w').write(last_mod_str)
 			
 
