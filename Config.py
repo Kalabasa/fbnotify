@@ -155,6 +155,9 @@ class Config:
 
 		cp = ConfigParser.ConfigParser()
 
+		cp.add_section(self._program_section)
+		cp.set(self._program_section, 'plugin_blacklist', self.program.plugin_blacklist)
+
 		cp.add_section(self._feed_section)
 		cp.set(self._feed_section, 'url', self.feed.url)
 		cp.set(self._feed_section, 'check_interval', self.feed.check_interval)
