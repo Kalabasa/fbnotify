@@ -106,7 +106,7 @@ class Plugin(PluginBase):
 
 			self.icon.set_from_file(icons.icon_path)
 			if self.items:
-				self.icon.set_tooltip_text(self.items[-1].wrapped)
+				self.icon.set_tooltip_text(self.items[0].wrapped)
 			else:
 				self.icon.set_tooltip_text('No Notifications')
 		elif self.status == 'updating':
