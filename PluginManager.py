@@ -242,8 +242,7 @@ class PluginManager:
 	def _start(self, plugin):
 		''' starts a plugin directly '''
 
-		# Catch KeybInt to terminate the plugin on ^C
 		try:
 			plugin.plugin_init()
-		except KeyboardInterrupt:
+		except Exception:
 			pass

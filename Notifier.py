@@ -136,6 +136,7 @@ class Notifier:
 		except Exception as e:
 			logger.error(traceback.format_exc())
 			self.bad_stop()
+		self.bad_stop();
 
 
 	def plugin_receive(self, channel, message):
