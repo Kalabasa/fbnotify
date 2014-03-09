@@ -69,7 +69,7 @@ class PluginManager:
 	def load(self, plugin_data, register_channels=True):
 		''' loads a plugin '''
 
-		logger.debug('Attempting to load plugin: ' + plugin_data.name + '...')
+		logger.debug('Attempting to load plugin: ' + plugin_data.name)
 		if plugin_data.name in self.blacklist:
 			logger.info('Plugin is blacklisted: ' + plugin_data.name)
 			return None
@@ -79,8 +79,10 @@ class PluginManager:
 			return self._active[plugin_data.name]
 
 		try:
+			logger.debug('Loading module: ' + plugin_data.module);
 			module = imp.load_module(plugin_data.module, *plugin_data.info)
 
+			logger.debug('Loading dependencies...');
 			depend = plugin_data.dependencies
 			if depend:
 				for p in depend:
@@ -90,14 +92,16 @@ class PluginManager:
 						logger.warning('Unable to load plugin: ' + plugin_data.name)
 						return None
 
+			logger.debug('Initializing plugin...');
 			plugin = module.Plugin()
 
+			logger.debug('Registering to channels...');
 			if register_channels:
 				for c in plugin_data.channels:
 					self.messaging.register_plugin(plugin, c)
 
+			logger.debug('Starting plugin...');
 			plugin.__thread = Thread(target=lambda: self._start(plugin))
-			plugin.__thread.daemon = True
 			plugin.__thread.start()
 
 			self._active[plugin_data.name] = plugin
@@ -245,4 +249,5 @@ class PluginManager:
 		try:
 			plugin.plugin_init()
 		except Exception:
+			logger.error('Plugin initialization failed.');
 			pass
