@@ -59,12 +59,13 @@ class Feed:
 			
 
 		# Read feed from URL
+		logger.debug('Loading feed URL')
 		is_modified = True
 		try:
 			request = urllib2.Request(self.feed_url)
 			request.add_header('If-Modified-Since', last_mod_str)
 			opener = urllib2.build_opener()
-			feed = opener.open(request)
+			feed = opener.open(request, None, 30)
 		except urllib2.HTTPError as e:
 			if e.code == 304: # Not modified
 				is_modified = False

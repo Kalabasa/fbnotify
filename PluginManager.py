@@ -74,39 +74,41 @@ class PluginManager:
 			logger.info('Plugin is blacklisted: ' + plugin_data.name)
 			return None
 
+		loaded = False
 		if plugin_data.name in self._active:
 			logger.warning(plugin_data.name + ' is already loaded!')
-			return self._active[plugin_data.name]
+			loaded = True
 
 		try:
-			logger.debug('Loading module: ' + plugin_data.module);
-			module = imp.load_module(plugin_data.module, *plugin_data.info)
+			if loaded:
+				plugin = self._active[plugin_data.name]
+			else:
+				logger.debug('Loading module: ' + plugin_data.module);
+				module = imp.load_module(plugin_data.module, *plugin_data.info)
 
-			logger.debug('Loading dependencies...');
-			depend = plugin_data.dependencies
-			if depend:
-				for p in depend:
-					logger.debug(plugin_data.name + ' depends on ' + p)
-					if not self.load_by_name(p):
-						logger.warning('Unable to satisfy the dependencies for ' + plugin_data.name)
-						logger.warning('Unable to load plugin: ' + plugin_data.name)
-						return None
+				logger.debug('Loading dependencies...');
+				depend = plugin_data.dependencies
+				if depend:
+					for p in depend:
+						logger.debug(plugin_data.name + ' depends on ' + p)
+						if not self.load_by_name(p):
+							logger.warning('Unable to satisfy the dependencies for ' + plugin_data.name)
+							logger.warning('Unable to load plugin: ' + plugin_data.name)
+							return None
 
-			logger.debug('Initializing plugin...');
-			plugin = module.Plugin()
+				logger.debug('Initializing plugin...');
+				plugin = module.Plugin()
+
+				logger.debug('Starting plugin...');
+				plugin.__thread = Thread(target=lambda: self._start(plugin))
+				plugin.__thread.start()
+
+				self._active[plugin_data.name] = plugin
 
 			logger.debug('Registering to channels...');
 			if register_channels:
 				for c in plugin_data.channels:
 					self.messaging.register_plugin(plugin, c)
-
-			logger.debug('Starting plugin...');
-			plugin.__thread = Thread(target=lambda: self._start(plugin))
-			plugin.__thread.start()
-
-			self._active[plugin_data.name] = plugin
-
-			logger.info('Loaded plugin: ' + plugin_data.name)
 
 		except Exception as e:
 			logger.warning('Unable to load plugin: ' + plugin_data.name)

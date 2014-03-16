@@ -77,7 +77,8 @@ class Plugin(PluginBase):
 				time.sleep(1)
 
 	def plugin_destroy(self):
-		self.menu.popdown()
+		if self.menu:
+			self.menu.popdown()
 		self.running = False
 
 	def plugin_receive(self, channel, message):

@@ -88,7 +88,7 @@ class Notifier:
 
 		try:
 			while True:
-				logger.info('Updating...')
+				logger.info('Updating...' + ' [' + time.strftime('%Y-%m-%d %X') + ']')
 				
 				# Update the feed
 				self.plugin_man.messaging.send(
@@ -170,7 +170,7 @@ class Notifier:
 
 		n = len(items)
 		n_new_notifications = '{0} new notification{1}'.format(n, '' if n == 1 else 's')
-		logger.info(n_new_notifications + ' [' + time.strftime('%Y-%m-%d %X') + ']')
+		logger.info(n_new_notifications)
 		if n == 0:
 			return
 
