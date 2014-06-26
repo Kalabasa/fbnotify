@@ -50,10 +50,16 @@ class Feed:
 		try:
 			last_mod_str = open(self._last_mod_path, 'r').readline()
 			last_mod = email.utils.mktime_tz(email.utils.parsedate_tz(last_mod_str))
-		except IOError:
+		except TypeError as e:
+			logger.error(str(e))
+			logger.warning('Invalid cache file content: ' + last_mod_str)
+		except IOError as e:
+			logger.error(str(e))
 			logger.warning('Unable to read ' + self._last_mod_path)
+		
+		if last_mod == 0:
 			logger.warning('A new file is created')
-			last_mod = 0#time.mktime(time.localtime())
+			last_mod = 0
 			last_mod_str = email.utils.formatdate(last_mod, True)
 			open(self._last_mod_path, 'w').write(last_mod_str)
 			

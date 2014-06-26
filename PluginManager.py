@@ -96,23 +96,23 @@ class PluginManager:
 							logger.warning('Unable to load plugin: ' + plugin_data.name)
 							return None
 
-				logger.debug('Initializing plugin...');
+				logger.debug('Initializing plugin ' + plugin_data.name + '...');
 				plugin = module.Plugin()
 
-				logger.debug('Starting plugin...');
+				logger.debug('Starting plugin ' + plugin_data.name + '...');
 				plugin.__thread = Thread(target=lambda: self._start(plugin))
 				plugin.__thread.start()
 
 				self._active[plugin_data.name] = plugin
 
-			logger.debug('Registering to channels...');
+			logger.debug('Registering ' + plugin_data.name + ' to channels...');
 			if register_channels:
 				for c in plugin_data.channels:
 					self.messaging.register_plugin(plugin, c)
 
 		except Exception as e:
 			logger.warning('Unable to load plugin: ' + plugin_data.name)
-			logger.warning(traceback.format_exc())
+			logger.warning(e)
 			return None
 
 		return plugin
@@ -153,6 +153,8 @@ class PluginManager:
 		if not candidate_plugins:
 			logger.error('No plugin loaded for role: ' + role)
 			return None
+
+		logger.debug('Found: ' + ', '.join(map((lambda p: p.name), candidate_plugins)))
 
 		# Sort by descending priority
 		candidate_plugins.sort(key=lambda p: p.channels[role], reverse=True)

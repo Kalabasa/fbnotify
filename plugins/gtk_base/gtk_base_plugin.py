@@ -18,12 +18,12 @@
 from PluginBase import PluginBase
 
 import gtk
+gtk.gdk.threads_init()
 
 class Plugin(PluginBase):
 	''' starts gtk.main '''
 
 	def plugin_init(self):
-		gtk.gdk.threads_init()
 		# Start gtk main loop
 		gtk.main()
 

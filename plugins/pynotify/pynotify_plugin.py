@@ -60,7 +60,7 @@ class Plugin(PluginBase):
 		# Show notification
 		n = pynotify.Notification(message['title'], message['body'], message['icon'])
 		if 'timeout' in message:
-			n.set_timeout(message['timeout'])
+			n.set_timeout(message['timeout'] * 1000)
 
 		if not n.show():
 			logger.error('Failed to show notification')

@@ -69,6 +69,7 @@ class Notifier:
 			print('')
 
 			logger.info('Initializing plugins...')
+			logger.debug('* Blaclisted: ' + str(self.conf.program.plugin_blacklist))
 			self.plugin_man = PluginManager(plugin_dirs, self.conf.program.plugin_blacklist)
 			self.plugin_man.load_by_role('notify')
 			self.plugin_man.load_by_role('list')

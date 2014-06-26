@@ -62,6 +62,7 @@ class Plugin(PluginBase):
 
 		# Wait for context
 		while not self.context:
+			time.sleep(1)
 			pass
 
 		# Poll messages periodically
