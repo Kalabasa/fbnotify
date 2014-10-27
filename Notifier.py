@@ -26,6 +26,7 @@ from datetime import datetime
 import urllib2
 import traceback
 import time
+import email.utils;
 import os
 
 import logging
@@ -89,7 +90,7 @@ class Notifier:
 
 		try:
 			while True:
-				logger.info('Updating...' + ' [' + time.strftime('%Y-%m-%d %X') + ']')
+				logger.info('Updating...' + ' [' + email.utils.formatdate(time.mktime(time.localtime()), True) + ']')
 				
 				# Update the feed
 				self.plugin_man.messaging.send(
@@ -107,6 +108,7 @@ class Notifier:
 						status='error',
 						description='Unable to load feed URL'
 					)
+					self.adjust_interval(0)
 
 				# If new items are loaded
 				if new_items is not None:
@@ -204,6 +206,8 @@ class Notifier:
 
 	def notify(self, title, body, icon=icons.xdg_icon, timeout=10):
 		''' requests to show a notification '''
+
+		logger.debug('Notify: ' + title + ' ' + body)
 
 		# This will send a message to any plugin
 		# listening to the 'notify' channel

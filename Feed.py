@@ -52,16 +52,18 @@ class Feed:
 			last_mod = email.utils.mktime_tz(email.utils.parsedate_tz(last_mod_str))
 		except TypeError as e:
 			logger.error(str(e))
-			logger.warning('Invalid cache file content: ' + last_mod_str)
+			logger.warning('Invalid cache file contents: ' + last_mod_str)
 		except IOError as e:
 			logger.error(str(e))
 			logger.warning('Unable to read ' + self._last_mod_path)
 		
 		if last_mod == 0:
-			logger.warning('A new file is created')
-			last_mod = 0
+			logger.warning('Cache is reset. Notifications may repeat.')
+			last_mod = 0#time.mktime(time.localtime())
 			last_mod_str = email.utils.formatdate(last_mod, True)
 			open(self._last_mod_path, 'w').write(last_mod_str)
+		else:
+			logger.debug('Last update was ' + email.utils.formatdate(last_mod, True))
 			
 
 		# Read feed from URL
