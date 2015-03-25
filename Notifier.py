@@ -70,7 +70,7 @@ class Notifier:
 			print('')
 
 			logger.info('Initializing plugins...')
-			logger.debug('* Blaclisted: ' + str(self.conf.program.plugin_blacklist))
+			logger.debug('* Blacklisted: ' + str(self.conf.program.plugin_blacklist))
 			self.plugin_man = PluginManager(plugin_dirs, self.conf.program.plugin_blacklist)
 			self.plugin_man.load_by_role('notify')
 			self.plugin_man.load_by_role('list')
@@ -186,13 +186,16 @@ class Notifier:
 		if n > 1: # Many notifications
 
 			if self.conf.notification.itemize >= n:
-				# Recite notifications if enabled
+				# Show individual notifications
 				interval = self.conf.notification.item_interval
 				for item in sorted(items, key=lambda x: x.dt):
-					self.notify(item.text, self.format_time(item.dt), 'file://' + item.image_path, interval)
-					time.sleep(interval)
+					if item.image_path == None:
+						self.notify(item.text, self.format_time(item.dt), timeout=interval)
+					else:
+						self.notify(item.text, self.format_time(item.dt), icon='file://' + item.image_path, timeout=interval)
+					time.sleep(interval + 1)
 			else:
-				# Declare multiple notifications instead of reciting
+				# Declare multiple notifications
 				dt = items[n-1].dt # Earliest notification date
 				self.notify(n_new_notifications, self.format_time(dt))
 
@@ -200,7 +203,10 @@ class Notifier:
 
 			item = items[0]
 			if self.conf.notification.show_content:
-				self.notify(item.text, self.format_time(item.dt), 'file://' + item.image_path)
+				if item.image_path == None:
+					self.notify(item.text, self.format_time(item.dt))
+				else:
+					self.notify(item.text, self.format_time(item.dt), 'file://' + item.image_path)
 			else:
 				self.notify(n_new_notifications, self.format_time(item.dt))
 
@@ -263,18 +269,22 @@ class Notifier:
 	def format_time(self, then):
 		''' Formats relative time to the specified time '''
 
+
 		now = datetime.now()
-		delta = now - then
-		if delta.days >= 1:
-			text = '{0} day{1} ago'.format(delta.days, '' if delta.days == 1 else 's')
-		elif delta.seconds >= 3600:
-			hours = delta.seconds / 3600
-			text = '{0} hour{1} ago'.format(hours, '' if hours == 1 else 's')
-		elif delta.seconds >= 60:
-			minutes = delta.seconds / 60
-			text = '{0} minute{1} ago'.format(minutes, '' if minutes == 1 else 's')
-		elif delta.seconds >= 30:
-			text = '{0} second{1} ago'.format(delta.seconds, '' if delta.seconds == 1 else 's')
-		else:
+		if then >= now:
 			text = 'Just now'
+		else:
+			delta = now - then
+			if delta.days >= 1:
+				text = '{0} day{1} ago'.format(delta.days, '' if delta.days == 1 else 's')
+			elif delta.seconds >= 3600:
+				hours = delta.seconds / 3600
+				text = '{0} hour{1} ago'.format(hours, '' if hours == 1 else 's')
+			elif delta.seconds >= 60:
+				minutes = delta.seconds / 60
+				text = '{0} minute{1} ago'.format(minutes, '' if minutes == 1 else 's')
+			elif delta.seconds >= 30:
+				text = '{0} second{1} ago'.format(delta.seconds, '' if delta.seconds == 1 else 's')
+			else:
+				text = 'Just now'
 		return text

@@ -63,7 +63,7 @@ class Item:
 		# Check if there is already a cached picture
 		file_path = os.path.join(images_directory, hashlib.sha1(user).hexdigest())
 		if os.path.isfile(file_path):
-			if random.random() > 0.03:
+			if random.random() > 0.08:
 				return file_path
 
 		# Save the picture to cache

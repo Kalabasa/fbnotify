@@ -240,12 +240,10 @@ class PluginManager:
 
 				try:
 					info = imp.find_module(module, [location])
+					plugin_data = PluginData(name, module, dependencies, channels, info)
+					self._plugins.append(plugin_data)
 				except ImportError:
 					continue
-
-				plugin_data = PluginData(name, module, dependencies, channels, info)
-				self._plugins.append(plugin_data)
-	
 
 	def _start(self, plugin):
 		''' starts a plugin directly '''

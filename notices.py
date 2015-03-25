@@ -5,7 +5,7 @@ version = '0.0'
 description = 'Facebook notifier'
 website = 'https://github.com/Kalabasa/fbnotify'
 
-copyright = '''Copyright (c) 2014 Lean Rada'''
+copyright = '''Copyright (c) 2015 Lean Rada'''
 authors = [
 	'Lean Rada, author'
 ]
@@ -13,7 +13,7 @@ authors = [
 license = '''
 --- fbnotify -------------------------------------------------------------
 
-Copyright (c) 2014 Lean Rada <godffrey0@gmail.com>
+Copyright (c) 2015 Lean Rada <godffrey0@gmail.com>
 
 fbnotify is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
