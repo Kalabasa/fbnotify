@@ -39,7 +39,7 @@ PluginData = collections.namedtuple('PluginData', [
 		'module',
 		'dependencies',
 		'channels',
-		'info'
+		'location'
 	])
 
 
@@ -84,7 +84,7 @@ class PluginManager:
 				plugin = self._active[plugin_data.name]
 			else:
 				logger.debug('Loading module: ' + plugin_data.module);
-				module = imp.load_module(plugin_data.module, *plugin_data.info)
+				module = imp.load_module(plugin_data.module, *imp.find_module(plugin_data.module, [plugin_data.location]))
 
 				logger.debug('Loading dependencies...');
 				depend = plugin_data.dependencies
@@ -240,7 +240,8 @@ class PluginManager:
 
 				try:
 					info = imp.find_module(module, [location])
-					plugin_data = PluginData(name, module, dependencies, channels, info)
+					info[0].close()
+					plugin_data = PluginData(name, module, dependencies, channels, location)
 					self._plugins.append(plugin_data)
 				except ImportError:
 					continue
