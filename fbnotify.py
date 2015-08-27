@@ -20,7 +20,7 @@
 import notices
 from Notifier import Notifier
 
-import colorlog
+from colorlog import colorlog
 
 import logging
 
