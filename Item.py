@@ -22,6 +22,7 @@ import time
 import textwrap
 import re
 import os
+import traceback
 
 import logging
 logger = logging.getLogger(__name__)
@@ -48,6 +49,10 @@ class Item:
 		self.image_path = self.get_image()
 
 	def get_image(self):
+		# The get profile picture from username API was deprecated June 2015
+		# Return nothing for now...
+		return None
+
 		# Get the first URL from the full text
 		# Assuming that the first URL points to a user
 		# Download the picture of that user
@@ -56,6 +61,7 @@ class Item:
 		# Find the username
 		user_match = _user_matcher.search(self.full)
 		if not user_match:
+			logger.warning('Did not understand URL ' + self.full)
 			return None
 
 		user = user_match.group(1)
@@ -70,13 +76,14 @@ class Item:
 		try:
 			logger.debug('Downloading image for ' + user + '...')
 			size = 48
-			image = urllib2.urlopen('http://graph.facebook.com/' + user + '/picture?width={0}&height={0}'.format(size))
+			image = urllib2.urlopen('http://graph.facebook.com/v2.4/' + user + '/picture?width={0}&height={0}'.format(size))
 			f = open(file_path, 'w')
 			f.write(image.read())
 			f.close()
 			os.chmod(file_path, 0600)
 			time.sleep(1.5 * random.random())
-		except IOError:
+		except IOError as e:
+			logger.error(traceback.format_exc())
 			return None
 
 		return file_path
