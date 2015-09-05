@@ -190,27 +190,27 @@ class Notifier:
 				interval = self.conf.notification.item_interval
 				for item in sorted(items, key=lambda x: x.dt):
 					if item.image_path == None:
-						self.notify(item.text, self.format_time(item.dt), timeout=interval)
+						self.notify(item.text, self.format_time(item.dt), timeout=interval, link=item.link)
 					else:
-						self.notify(item.text, self.format_time(item.dt), icon='file://' + item.image_path, timeout=interval)
+						self.notify(item.text, self.format_time(item.dt), icon='file://' + item.image_path, timeout=interval, link=item.link)
 					time.sleep(interval + 1)
 			else:
 				# Declare multiple notifications
 				dt = items[n-1].dt # Earliest notification date
-				self.notify(n_new_notifications, self.format_time(dt))
+				self.notify(n_new_notifications, self.format_time(dt), link='www.facebook.com/notifications')
 
 		else: # Single notification
 
 			item = items[0]
 			if self.conf.notification.show_content:
 				if item.image_path == None:
-					self.notify(item.text, self.format_time(item.dt))
+					self.notify(item.text, self.format_time(item.dt), link=item.link)
 				else:
-					self.notify(item.text, self.format_time(item.dt), 'file://' + item.image_path)
+					self.notify(item.text, self.format_time(item.dt), icon='file://' + item.image_path, link=item.link)
 			else:
 				self.notify(n_new_notifications, self.format_time(item.dt))
 
-	def notify(self, title, body, icon=icons.xdg_icon, timeout=10):
+	def notify(self, title, body, icon=icons.xdg_icon, timeout=10, link=None):
 		''' requests to show a notification '''
 
 		logger.debug('Notify: ' + title + ' ' + body)
@@ -222,7 +222,8 @@ class Notifier:
 			title = title,
 			body = body,
 			icon = icon,
-			timeout = timeout
+			timeout = timeout,
+			link = link
 		)
 
 

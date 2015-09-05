@@ -21,6 +21,7 @@ import icons
 import pynotify
 
 import time
+import webbrowser
 
 import logging
 logger = logging.getLogger(__name__)
@@ -60,6 +61,12 @@ class Plugin(PluginBase):
 		n = pynotify.Notification(message['title'], message['body'], message['icon'])
 		if 'timeout' in message:
 			n.set_timeout(message['timeout'] * 1000)
+		if 'link' in message:
+			n.add_action('open', 'Open', self.clicked, message['link'])
 
 		if not n.show():
 			logger.error('Failed to show notification')
+
+	def clicked(n, action, link):
+		assert action == 'open'
+		webbrowser.open(link)

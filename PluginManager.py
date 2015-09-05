@@ -100,7 +100,7 @@ class PluginManager:
 				plugin = module.Plugin()
 
 				logger.debug('Starting plugin ' + plugin_data.name + '...');
-				plugin.__thread = Thread(target=lambda: self._start(plugin))
+				plugin.__thread = Thread(target=lambda: self._start(plugin, plugin_data.name))
 				plugin.__thread.start()
 
 				self._active[plugin_data.name] = plugin
@@ -246,11 +246,12 @@ class PluginManager:
 				except ImportError:
 					continue
 
-	def _start(self, plugin):
+	def _start(self, plugin, name):
 		''' starts a plugin directly '''
 
 		try:
 			plugin.plugin_init()
-		except Exception:
-			logger.error('Plugin initialization failed.');
+		except Exception as e:
+			logger.error('Plugin ' + name + ' failed with the following:');
+			logger.error(traceback.format_exc())
 			pass
