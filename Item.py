@@ -17,6 +17,7 @@
 
 import urllib2
 import hashlib
+import uuid
 import random
 import time
 import textwrap
@@ -34,12 +35,19 @@ _user_matcher = re.compile(r'https?://www.facebook.com/n/\?(.+?)&')
 class Item:
 	''' a notification item '''
 
+	id = None
+
 	text = ''
 	link = ''
 	full = ''
 	dt = None
 
+	wrapped = None
+	image_path = None
+
 	def __init__(self, text, link, full, dt):
+		self.id = uuid.uuid4();
+		
 		self.text = text
 		self.link = link
 		self.full = full

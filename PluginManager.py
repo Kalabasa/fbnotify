@@ -132,7 +132,7 @@ class PluginManager:
 		self.messaging.unregister_plugin(plugin)
 
 		plugin.plugin_destroy()
-		plugin.__thread.join()
+		plugin.__thread.join(1)
 		
 		plugin.context = None
 

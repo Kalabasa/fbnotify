@@ -52,7 +52,6 @@ class Plugin(PluginBase):
 	def plugin_destroy(self):
 		# Stop the main loop
 		self.running = False
-		pass
 
 	def plugin_receive(self, channel, message):
 		# Receiving a message from the 'notify' channel

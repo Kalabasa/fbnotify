@@ -40,7 +40,7 @@ class Plugin(PluginBase):
 
 	items = []
 	has_new_items = False
-	max_items = 10
+	max_items = 6
 
 	status = None
 	message = None
@@ -78,9 +78,9 @@ class Plugin(PluginBase):
 				time.sleep(1)
 
 	def plugin_destroy(self):
+		self.running = False
 		if self.menu:
 			self.menu.popdown()
-		self.running = False
 
 	def plugin_receive(self, channel, message):
 		if channel == 'list':
