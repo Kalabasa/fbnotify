@@ -1,7 +1,7 @@
 Facebook Notifier
 =================
 
-**fbnotify** is be a cross-platform Facebook notifier using Python. 
+**fbnotify** is a cross-platform Facebook notifier using Python. 
 
 It runs in the background and notifies you whenever you get a notification in Facebook. Notifications come to you instead of you coming for them.
 
