@@ -1,9 +1,7 @@
 Facebook Notifier
 =================
 
-**fbnotify** ~~is~~ will be a cross-platform Facebook notifier using Python. 
-
-This is still in-development!
+**fbnotify** is be a cross-platform Facebook notifier using Python. 
 
 It runs in the background and notifies you whenever you get a notification in Facebook. Notifications come to you instead of you coming for them.
 
@@ -54,18 +52,11 @@ There is a plugin system. Plugins are responsible for showing notifications, res
 
 Plugins are located in the `plugins/` directory or in `~/.config/fbnotify/plugins/` or similar.
 
-### Not Yet Implemented ###
+### Not Implemented (Yet) ###
 
 * Unity Messaging Menu
-* GTK status icon notifications (not libnotify)
-* Mac status icon (?)
-* Mac notifications (?)
 * Windows notifications
 * Windows status icon
-
-### Contribute ###
-
-Create plugins (annihilate the above list)
 
 Libraries
 =========
